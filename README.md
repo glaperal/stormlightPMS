@@ -20,17 +20,30 @@ landlord organization with strict Row Level Security.
 # 1. Install deps
 npm install
 
-# 2. Configure environment
-cp .env.example .env.local
-# then fill VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+# 2. Start local Supabase (Docker)
+supabase start              # prints the API URL + anon key
+supabase db reset           # runs migrations + seed.sql (Vision Homes data)
 
-# 3. Start local Supabase (Docker)
-supabase start
-supabase db reset        # runs migrations + seed.sql (Vision Homes data)
+# 3. Configure environment
+cp .env.example .env.local
+# paste the values from `supabase start` into VITE_SUPABASE_URL
+# and VITE_SUPABASE_ANON_KEY
 
 # 4. Run the app
-npm run dev              # http://localhost:5173
+npm run dev                 # http://localhost:5173
 ```
+
+### Demo credentials
+
+The seed provisions a super-admin user scoped to Vision Homes Inc.:
+
+| Email                         | Password      |
+| ----------------------------- | ------------- |
+| `admin@stormlightpms.local`   | `stormlight`  |
+
+Rotate these before deploying anywhere real — the auth row is seeded in plain SQL
+for local dev only. For hosted environments, provision users via the Supabase
+auth admin API and drop the `Demo auth user` block from `seed.sql`.
 
 ## Project layout
 

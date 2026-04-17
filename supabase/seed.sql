@@ -2,6 +2,55 @@
 -- Reflects Vision Building 1 lease book as of 2026-04-17.
 -- Source: "Vision Homes - Areas & Rates 2026" spreadsheet.
 
+-- Demo auth user -------------------------------------------------------
+-- Intended for local dev only. `supabase start` exposes GoTrue, which hashes
+-- passwords with bcrypt via pgcrypto's crypt(). We insert the row directly
+-- so `supabase db reset` produces a login-ready user:
+--   email:    admin@stormlightpms.local
+--   password: stormlight
+-- For hosted / production, provision users through the Supabase auth API and
+-- skip this block (it's idempotent but obviously-fake credentials).
+create extension if not exists "pgcrypto";
+
+do $$
+declare
+  v_user_id uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa01';
+  v_email   text := 'admin@stormlightpms.local';
+begin
+  if not exists (select 1 from auth.users where id = v_user_id) then
+    insert into auth.users (
+      instance_id, id, aud, role, email, encrypted_password,
+      email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+      created_at, updated_at,
+      confirmation_token, email_change, email_change_token_new, recovery_token
+    ) values (
+      '00000000-0000-0000-0000-000000000000',
+      v_user_id,
+      'authenticated',
+      'authenticated',
+      v_email,
+      crypt('stormlight', gen_salt('bf')),
+      now(),
+      jsonb_build_object('provider', 'email', 'providers', array['email']),
+      '{}'::jsonb,
+      now(), now(),
+      '', '', '', ''
+    );
+
+    insert into auth.identities (
+      id, user_id, provider_id, identity_data, provider,
+      last_sign_in_at, created_at, updated_at
+    ) values (
+      gen_random_uuid(),
+      v_user_id,
+      v_user_id::text,
+      jsonb_build_object('sub', v_user_id::text, 'email', v_email),
+      'email',
+      now(), now(), now()
+    );
+  end if;
+end $$;
+
 -- Landlord group -------------------------------------------------------
 insert into landlord_groups (id, name, vat_registered, address)
 values (
@@ -65,6 +114,15 @@ insert into tenants (id, group_id, name, type) values
   ('55555555-5555-5555-5555-555555555005', '11111111-1111-1111-1111-111111111111', 'Smarter Minds',                    'Corp'),
   ('55555555-5555-5555-5555-555555555006', '11111111-1111-1111-1111-111111111111', 'Dr. Chua (Dentist)',               'Ind')
 on conflict (id) do nothing;
+
+-- Link the demo auth user to Vision Homes as super_admin --------------
+insert into user_roles (user_id, role, group_id)
+values (
+  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa01',
+  'super_admin',
+  '11111111-1111-1111-1111-111111111111'
+)
+on conflict (user_id, group_id) do update set role = excluded.role;
 
 -- Leases (2026 contract year) ------------------------------------------
 -- Arte Manila Salon — packaged 101+102+103 at ₱138,506 non-VAT, dues packaged,
