@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -12,6 +12,9 @@ import {
   listUnitsForProperty,
 } from "@/features/properties/api-unit";
 import { UnitSheet } from "@/features/properties/UnitSheet";
+import { useAuth } from "@/features/auth/AuthProvider";
+import { listTickets } from "@/features/maintenance/api";
+import { formatPeso } from "@/lib/currency";
 import type { Unit, UnitStatus } from "@/types/database";
 
 const statusVariant: Record<UnitStatus, "success" | "secondary" | "warning"> = {
@@ -23,6 +26,7 @@ const statusVariant: Record<UnitStatus, "success" | "secondary" | "warning"> = {
 export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { activeGroupId } = useAuth();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<Unit | null>(null);
 
@@ -37,6 +41,21 @@ export function PropertyDetailPage() {
     queryFn: () => listUnitsForProperty(id!),
     enabled: !!id,
   });
+
+  const { data: tickets = [] } = useQuery({
+    queryKey: ["tickets", activeGroupId],
+    queryFn: () => listTickets(activeGroupId!),
+    enabled: !!activeGroupId,
+  });
+
+  const capexByUnit = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const t of tickets) {
+      if (t.cost == null) continue;
+      m.set(t.unit_id, (m.get(t.unit_id) ?? 0) + Number(t.cost));
+    }
+    return m;
+  }, [tickets]);
 
   const columns: DataTableColumn<Unit>[] = [
     { key: "name", header: "Name", accessor: (r) => r.name, sortValue: (r) => r.name },
@@ -54,6 +73,20 @@ export function PropertyDetailPage() {
         <Badge variant={statusVariant[r.status]}>{r.status}</Badge>
       ),
       sortValue: (r) => r.status,
+    },
+    {
+      key: "capex",
+      header: "Maintenance",
+      accessor: (r) => {
+        const total = capexByUnit.get(r.id) ?? 0;
+        return total > 0 ? (
+          <span className="tabular-nums">{formatPeso(total)}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        );
+      },
+      sortValue: (r) => capexByUnit.get(r.id) ?? 0,
+      className: "text-right",
     },
     {
       key: "notes",

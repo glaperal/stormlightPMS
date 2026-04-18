@@ -330,3 +330,39 @@ begin
     end if;
   end loop;
 end $$;
+
+-- Maintenance tickets ----------------------------------------------------
+-- A mix of resolved (with real costs), in-progress, and open tickets against
+-- Vision Homes units so Maintenance page + per-unit CapEx totals render.
+insert into tickets (id, group_id, unit_id, issue, cost, status) values
+  ('88888888-8888-8888-8888-888888888101', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330101',
+    'Glass door hinge replacement (street entrance)', 3850.00, 'Resolved'),
+  ('88888888-8888-8888-8888-888888888102', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330103',
+    'Repaint salon backroom after water stain', 7200.00, 'Resolved'),
+  ('88888888-8888-8888-8888-888888888104', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330104',
+    'Replace ceiling tiles & deep-clean before next tenant', 4150.00, 'Resolved'),
+  ('88888888-8888-8888-8888-888888888201', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330201',
+    'Split-type AC recharge (Grace Life)', 2400.00, 'Resolved'),
+  ('88888888-8888-8888-8888-888888888202', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330202',
+    'Playroom flooring touch-ups (Bright Discovery)', 5600.00, 'InProgress'),
+  ('88888888-8888-8888-8888-888888888205', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330205',
+    'Leaking window sill — needs contractor quote', null, 'Open'),
+  ('88888888-8888-8888-8888-888888888301', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330301',
+    'Water damage assessment after Typhoon Carina', 12800.00, 'Resolved'),
+  ('88888888-8888-8888-8888-888888888304', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330304',
+    'Annual pest control (Smarter Minds)', 1850.00, 'Resolved'),
+  ('88888888-8888-8888-8888-888888888305', '11111111-1111-1111-1111-111111111111',
+    '33333333-3333-3333-3333-333333330305',
+    'Replace compressor on dental chair chiller', null, 'Open'),
+  ('88888888-8888-8888-8888-888888888901', '11111111-1111-1111-1111-111111111111',
+    '44444444-4444-4444-4444-444444440005',
+    'Re-stripe parking lines — slots 5 and 6', 950.00, 'Resolved')
+on conflict (id) do nothing;
