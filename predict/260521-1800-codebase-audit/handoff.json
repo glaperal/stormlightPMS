@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "tool": "predict",
+  "generated_at": "2026-05-21T18:00:00+08:00",
+  "commit_hash": "53d7bd39125121c1f435987ed01ff4cb05708b05",
+  "scope": ["StormlightPMS/**"],
+  "excluded": ["StormlightPMS/supabase/migrations/**"],
+  "summary": {
+    "personas": 5,
+    "rounds": 2,
+    "findings_confirmed": 21,
+    "findings_probable": 7,
+    "findings_minority": 3,
+    "anti_herd_passed": true,
+    "predict_score": 415
+  },
+  "hypotheses": [
+    {"rank": 1, "id": "H-01", "title": "ErrorBoundary", "confidence": "HIGH", "location": "src/main.tsx,src/App.tsx"},
+    {"rank": 2, "id": "H-02", "title": "Route lazy + vendor manualChunks", "confidence": "HIGH", "location": "src/App.tsx,vite.config.ts"},
+    {"rank": 3, "id": "H-03", "title": "Split LeaseDetailPage", "confidence": "HIGH", "location": "src/pages/leases/LeaseDetailPage.tsx"},
+    {"rank": 4, "id": "H-04", "title": "Hard-fail run-daily-jobs without secret", "confidence": "HIGH", "location": "supabase/functions/run-daily-jobs/index.ts"},
+    {"rank": 5, "id": "H-05", "title": "Modal+Field a11y", "confidence": "HIGH", "location": "src/components/ui/Modal.tsx,src/components/ui/Field.tsx"},
+    {"rank": 6, "id": "H-06", "title": "Maintenance row keyboard", "confidence": "HIGH", "location": "src/pages/maintenance/MaintenancePage.tsx"},
+    {"rank": 7, "id": "H-07", "title": "Unread badge in sidebar", "confidence": "HIGH", "location": "src/components/AppShell.tsx"},
+    {"rank": 8, "id": "H-08", "title": "NotFoundPage", "confidence": "HIGH", "location": "src/App.tsx"}
+  ]
+}

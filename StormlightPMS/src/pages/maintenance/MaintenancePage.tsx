@@ -114,6 +114,7 @@ export function MaintenancePage() {
                 <th className="px-4 py-3 font-medium">Priority</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Cost</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -143,7 +144,7 @@ function RequestRow({ row, onChanged }: { row: Request; onChanged: () => void })
   const [editing, setEditing] = useState(false);
   return (
     <>
-      <tr className="table-row border-t border-slate-100 cursor-pointer" onClick={() => setEditing(true)}>
+      <tr className="table-row border-t border-slate-100">
         <td className="px-4 py-3">{fmtDate(row.reported_date)}</td>
         <td className="px-4 py-3">
           {row.units?.properties?.name ?? '—'} · {row.units?.unit_label ?? '—'}
@@ -156,6 +157,16 @@ function RequestRow({ row, onChanged }: { row: Request; onChanged: () => void })
           <StatusBadge value={row.status} />
         </td>
         <td className="px-4 py-3">{row.cost ? fmtPHP(row.cost) : '—'}</td>
+        <td className="px-4 py-3 text-right">
+          <button
+            type="button"
+            className="text-xs text-slate-700 hover:underline focus:outline-none focus:ring-2 focus:ring-slate-400 rounded px-1"
+            aria-label={`Edit maintenance request: ${row.title}`}
+            onClick={() => setEditing(true)}
+          >
+            Edit
+          </button>
+        </td>
       </tr>
       <EditRequestModal
         open={editing}

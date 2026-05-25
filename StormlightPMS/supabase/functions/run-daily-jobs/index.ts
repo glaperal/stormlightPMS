@@ -19,11 +19,20 @@ interface NotificationRow {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders() });
 
+  // Hard fail when the shared secret is unset. This function runs with
+  // `verify_jwt = false` so the secret is the ONLY thing standing between
+  // anonymous callers and the daily fanout. A missing env var must never
+  // silently downgrade to "anyone can fire".
   const expected = Deno.env.get('JOBS_SHARED_SECRET');
-  if (expected) {
-    const got = req.headers.get('x-jobs-secret') ?? '';
-    if (got !== expected) return jsonResponse(401, { error: 'unauthorized' });
+  if (!expected || expected.length < 16) {
+    return jsonResponse(503, {
+      error: 'misconfigured',
+      detail:
+        'JOBS_SHARED_SECRET is missing or too short. Set it (>=16 chars) before enabling the daily cron.',
+    });
   }
+  const got = req.headers.get('x-jobs-secret') ?? '';
+  if (got !== expected) return jsonResponse(401, { error: 'unauthorized' });
 
   const admin = adminClient();
 

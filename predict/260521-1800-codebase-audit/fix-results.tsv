@@ -1,0 +1,8 @@
+iter	hypothesis	change	main_js_raw	main_js_gz	total_chunks	typecheck	build	decision	notes
+0	baseline	—	679757	186574	1	pass	pass	baseline	pre-fix snapshot
+1	H-01,H-08	ErrorBoundary + NotFoundPage	681392	187556	1	pass	pass	keep	+0.5% gz; new safety net
+2	H-02	Route lazy + manualChunks vendor split	41314	13443	28	pass	pass	keep	entry chunk -93% gz; lazy + 6 vendor chunks
+3	H-05	Modal a11y (labelledby+focus trap+restore+click-outside) + Field a11y (aria-invalid+describedby via cloneElement)	41342	13418	28	pass	pass	keep	WCAG 2.1.1 / 2.4.3 fixes; no measurable bundle delta
+4	H-06,H-07	Maintenance row keyboard btn + sidebar unread badge + useUnreadCount hook	41910	13649	28	pass	pass	keep	+1.7% gz vs iter 3; tiny for two features
+5	H-04	run-daily-jobs hard-fail if JOBS_SHARED_SECRET unset (<16 chars)	41910	13649	28	pass	pass	keep	Edge fn only; bundle unchanged. Closes anon-fanout risk.
+6	H-03	Split LeaseDetailPage 1078 LOC -> 283 LOC + 9 siblings	41910	13640	28	pass	pass	keep	Page-size goal met (<250 for siblings, <300 for orchestrator). LeaseDetailPage chunk basically unchanged

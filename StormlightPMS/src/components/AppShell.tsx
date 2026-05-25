@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { type ReactNode } from 'react';
 import { useAuth, hasRole } from '@/lib/auth';
 import { cn } from '@/lib/cn';
+import { useUnreadCount } from '@/hooks/useUnreadCount';
 
 interface NavItem {
   to: string;
@@ -27,6 +28,7 @@ const nav: NavItem[] = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { claims, user, signOut } = useAuth();
+  const unread = useUnreadCount();
 
   return (
     <div className="min-h-screen flex">
@@ -46,12 +48,20 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={n.to}
                 className={({ isActive }) =>
                   cn(
-                    'block rounded px-3 py-2 text-sm',
+                    'flex items-center justify-between rounded px-3 py-2 text-sm',
                     isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800',
                   )
                 }
               >
-                {n.label}
+                <span>{n.label}</span>
+                {n.to === '/notifications' && unread > 0 && (
+                  <span
+                    className="ml-2 inline-flex items-center justify-center rounded-full bg-rose-600 px-2 text-xs font-semibold text-white"
+                    aria-label={`${unread} unread notifications`}
+                  >
+                    {unread > 99 ? '99+' : unread}
+                  </span>
+                )}
               </NavLink>
             ))}
         </nav>
