@@ -1,3 +1,7 @@
+// This is the auth context module: the AuthProvider component is colocated with
+// its useAuth hook and the hasRole helper by design. Splitting them across files
+// to satisfy react-refresh would fragment 15 import sites for a dev-only HMR nicety.
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';

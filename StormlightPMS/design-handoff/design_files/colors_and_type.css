@@ -1,0 +1,317 @@
+/* =========================================================================
+   StormlightPMS — Colors & Type Foundations
+   Property management system for Filipino lessors.
+   Premium fintech. Deep navy + teal + warm gold on cool white/slate.
+
+   Fonts (Google Fonts):
+     Display serif ... Spectral
+     UI / body sans .. Plus Jakarta Sans
+     Numeric / mono .. JetBrains Mono
+   Load once per page:
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+   ========================================================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* ----------------------------------------------------------------------
+     1. FONT FAMILIES
+     ---------------------------------------------------------------------- */
+  --font-display: "Spectral", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ----------------------------------------------------------------------
+     2. CORE PALETTE — raw scales
+     ---------------------------------------------------------------------- */
+
+  /* Navy — primary brand. The "storm". */
+  --navy-50:  #EAF1F8;
+  --navy-100: #CBDDEE;
+  --navy-200: #9CBCDB;
+  --navy-300: #6695C4;
+  --navy-400: #3A6FA8;
+  --navy-500: #0B3D6B;  /* BASE — primary brand color */
+  --navy-600: #0A355E;
+  --navy-700: #082A4B;
+  --navy-800: #061F38;
+  --navy-900: #041627;
+
+  /* Teal — secondary. The "light". Calm, electric, trustworthy. */
+  --teal-50:  #E6F6F7;
+  --teal-100: #C0E9EC;
+  --teal-200: #8FD7DC;
+  --teal-300: #57C2C9;
+  --teal-400: #2EAAB3;
+  --teal-500: #1B9AAA;  /* BASE — secondary / interactive accent */
+  --teal-600: #16808E;
+  --teal-700: #126773;
+  --teal-800: #0E4E58;
+  --teal-900: #0A3A42;
+
+  /* Gold — warm highlight. The "bolt". Use sparingly for emphasis. */
+  --gold-50:  #FDF7E7;
+  --gold-100: #FBEDC2;
+  --gold-200: #F8DE93;
+  --gold-300: #F5CE63;
+  --gold-400: #F2C14E;  /* BASE — accent / highlight */
+  --gold-500: #E0A92F;
+  --gold-600: #C28E1F;
+  --gold-700: #9A6F16;
+
+  /* Slate — cool neutrals (tuned toward navy, not pure gray) */
+  --slate-0:   #FFFFFF;
+  --slate-25:  #FAFBFD;
+  --slate-50:  #F4F7FB;
+  --slate-100: #E9EEF4;
+  --slate-200: #D6DEE8;
+  --slate-300: #B6C2D1;
+  --slate-400: #8B9AAC;
+  --slate-500: #647386;
+  --slate-600: #4A5666;
+  --slate-700: #36404D;
+  --slate-800: #232B35;
+  --slate-900: #131820;
+
+  /* Semantic status hues */
+  --success-50:  #E7F5EE;
+  --success-100: #C5E7D5;
+  --success-500: #1F9D64;
+  --success-600: #178050;
+  --success-700: #115F3B;
+
+  --warning-50:  #FCF1E2;
+  --warning-100: #F8E0BD;
+  --warning-500: #D98324;
+  --warning-600: #B86A17;
+  --warning-700: #8C4F0F;
+
+  --danger-50:  #FBE9E8;
+  --danger-100: #F4C9C6;
+  --danger-500: #D8453C;
+  --danger-600: #B5352D;
+  --danger-700: #8A2620;
+
+  /* ----------------------------------------------------------------------
+     3. SEMANTIC COLOR TOKENS — use THESE in UI, not raw scales
+     ---------------------------------------------------------------------- */
+
+  /* Brand */
+  --brand:            var(--navy-500);
+  --brand-hover:      var(--navy-600);
+  --brand-active:     var(--navy-700);
+  --brand-subtle:     var(--navy-50);
+  --accent:           var(--gold-400);
+  --accent-hover:     var(--gold-500);
+  --accent-strong:    var(--gold-600);   /* gold for icons/text needing contrast */
+  --accent-fg:        var(--navy-900);   /* text/icon ON a gold fill */
+  --accent-subtle:    var(--gold-50);
+  --secondary:        var(--teal-500);   /* teal: secondary / data-viz / info */
+  --secondary-subtle: var(--teal-50);
+  --highlight:        var(--gold-400);
+  --highlight-strong: var(--gold-600);
+
+  /* Surfaces / backgrounds */
+  --bg-app:        var(--slate-50);    /* page background */
+  --bg-surface:    var(--slate-0);     /* cards, panels */
+  --bg-subtle:     var(--slate-25);    /* nested / zebra rows */
+  --bg-muted:      var(--slate-100);   /* wells, disabled fills */
+  --bg-inverse:    var(--navy-700);    /* dark sidebar / nav */
+  --bg-inverse-2:  var(--navy-800);
+
+  /* Foreground / text */
+  --fg-1:          var(--slate-900);   /* primary text + headings */
+  --fg-2:          var(--slate-600);   /* secondary / body */
+  --fg-3:          var(--slate-400);   /* muted / captions / placeholders */
+  --fg-on-brand:   #FFFFFF;
+  --fg-on-dark:    var(--navy-50);
+  --fg-on-dark-2:  var(--navy-200);
+  --fg-link:       var(--gold-700);
+
+  /* Borders / dividers */
+  --border-subtle:  var(--slate-100);
+  --border:         var(--slate-200);
+  --border-strong:  var(--slate-300);
+  --border-focus:   var(--gold-500);
+  --border-inverse: rgba(255, 255, 255, 0.12);
+
+  /* Status (text + fill pairs) */
+  --status-success:     var(--success-500);
+  --status-success-bg:  var(--success-50);
+  --status-success-fg:  var(--success-700);
+  --status-warning:     var(--warning-500);
+  --status-warning-bg:  var(--warning-50);
+  --status-warning-fg:  var(--warning-700);
+  --status-danger:      var(--danger-500);
+  --status-danger-bg:   var(--danger-50);
+  --status-danger-fg:   var(--danger-700);
+  --status-info:        var(--teal-600);
+  --status-info-bg:     var(--teal-50);
+  --status-info-fg:     var(--teal-800);
+
+  /* ----------------------------------------------------------------------
+     4. RADII — crisp, professional
+     ---------------------------------------------------------------------- */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;   /* default card radius */
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* ----------------------------------------------------------------------
+     5. SHADOWS — subtle, cool (tinted with navy, never pure black)
+     ---------------------------------------------------------------------- */
+  --shadow-xs: 0 1px 2px rgba(6, 31, 56, 0.06);
+  --shadow-sm: 0 1px 3px rgba(6, 31, 56, 0.08), 0 1px 2px rgba(6, 31, 56, 0.04);
+  --shadow-md: 0 4px 12px rgba(6, 31, 56, 0.08), 0 2px 4px rgba(6, 31, 56, 0.04);
+  --shadow-lg: 0 10px 28px rgba(6, 31, 56, 0.10), 0 4px 8px rgba(6, 31, 56, 0.05);
+  --shadow-xl: 0 20px 48px rgba(6, 31, 56, 0.16), 0 8px 16px rgba(6, 31, 56, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(224, 169, 47, 0.34);    /* gold focus ring */
+  --shadow-focus-danger: 0 0 0 3px rgba(216, 69, 60, 0.24);
+
+  /* ----------------------------------------------------------------------
+     6. SPACING — 4px base
+     ---------------------------------------------------------------------- */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ----------------------------------------------------------------------
+     7. TYPE SCALE — sizes, line-heights, weights
+     ---------------------------------------------------------------------- */
+  --text-display: 56px;
+  --text-h1: 40px;
+  --text-h2: 30px;
+  --text-h3: 24px;
+  --text-h4: 19px;
+  --text-lg: 18px;
+  --text-base: 15px;   /* dashboard body default */
+  --text-sm: 13px;
+  --text-xs: 12px;
+  --text-2xs: 11px;
+
+  --leading-tight: 1.12;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-caps: 0.08em;   /* overlines / labels */
+}
+
+/* =========================================================================
+   8. SEMANTIC TYPE CLASSES
+   ========================================================================= */
+
+.t-display {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-display);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-h1);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-h2);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+  color: var(--fg-1);
+}
+
+.t-h3 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-h3);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+  color: var(--fg-1);
+}
+
+.t-h4 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-h4);
+  line-height: var(--leading-snug);
+  color: var(--fg-1);
+}
+
+.t-body {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--fg-2);
+}
+
+.t-body-strong {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--fg-1);
+}
+
+.t-sm {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--fg-2);
+}
+
+.t-overline {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-2xs);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.t-num {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+}
+
+/* Tabular figures helper — apply to any element showing aligned ₱ amounts */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}

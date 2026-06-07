@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- @startingPoint section="Screens" subtitle="Full lessor dashboard — auth, rent roll, payments, tenants, reports" viewport="1320x840" -->
+<!-- @dsCard group="UI Kit — Web Dashboard" name="Lessor dashboard (UI kit)" subtitle="Interactive dashboard — KPIs, rent roll, payment flow, tenants, maintenance" viewport="1320x840" -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StormlightPMS — Lessor dashboard</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo-mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); color: var(--fg-1); background: var(--bg-app); -webkit-font-smoothing: antialiased; }
+  input { font-family: var(--font-sans); }
+  ::placeholder { color: var(--fg-3); }
+  .storm-row:hover { background: var(--bg-subtle); }
+  .storm-pick:hover { background: var(--bg-subtle); }
+  .storm-lift { transition: box-shadow .15s ease, transform .15s ease; }
+  .storm-lift:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 6px; border: 2px solid var(--bg-app); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--slate-300); }
+  @keyframes storm-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes storm-pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes storm-slide { from { transform: translateX(24px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+  @keyframes storm-toast { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script src="data.js"></script>
+  <script type="text/babel" src="ui.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="views1.jsx"></script>
+  <script type="text/babel" src="views2.jsx"></script>
+  <script type="text/babel" src="property.jsx"></script>
+  <script type="text/babel" src="views3.jsx"></script>
+  <script type="text/babel" src="utilities.jsx"></script>
+  <script type="text/babel" src="forms.jsx"></script>
+  <script type="text/babel" src="lease.jsx"></script>
+  <script type="text/babel" src="settings.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
