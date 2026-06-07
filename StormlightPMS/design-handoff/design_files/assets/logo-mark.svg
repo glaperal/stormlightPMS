@@ -1,0 +1,14 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="StormlightPMS">
+  <defs>
+    <linearGradient id="sl-tile" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B3D6B"></stop>
+      <stop offset="1" stop-color="#082A4B"></stop>
+    </linearGradient>
+    <linearGradient id="sl-bolt" x1="16" y1="7" x2="40" y2="49" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5CE63"></stop>
+      <stop offset="1" stop-color="#F2C14E"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="56" height="56" rx="14" fill="url(#sl-tile)"></rect>
+  <path d="M33 8 L17 31 L26.5 31 L23 48 L39 25 L29.5 25 Z" fill="url(#sl-bolt)"></path>
+</svg>
