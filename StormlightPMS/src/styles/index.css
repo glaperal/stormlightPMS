@@ -1,6 +1,7 @@
 /* Design tokens (single source of truth) — ported verbatim from the design
    handoff (design-handoff/design_files/colors_and_type.css). Must load before
    Tailwind so the var()-based theme can resolve. */
+@import './fonts.css';
 @import './tokens.css';
 
 @tailwind base;
