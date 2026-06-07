@@ -4,8 +4,8 @@
 |-------|-------|
 | Product | StormlightPMS — Stormlight Property Management System |
 | Document | Software Requirements Specification |
-| Version | 0.2 — Revised; incorporates v0.1 review fixes and decisions D1–D4 |
-| Date | 2026-05-21 |
+| Version | 0.3 — Incorporates v0.2 + the v1.0↔v0.2 spec reconciliation (decisions D5–D8); see `StormlightPMS_Spec_Reconciliation.md` |
+| Date | 2026-06-07 (v0.3); 2026-05-21 (v0.2) |
 | Owner | GVL (Gerardo V. Laperal) |
 | Operating entity | Stormlight Inc. — StormlightPMS is a **product line** of Stormlight Inc.; the superAdmin role is held by Stormlight Inc. as platform operator |
 | Companion document | StormlightPMS_PRD.md |
@@ -45,6 +45,21 @@ This revision is a build contract. Every change below is a correction to a v0.1 
 - **P1-16** — `updated_at` is maintained by a trigger, not the client (§9.4).
 - **P1-19** — Full `lease_status` → `unit_status` transition table (§6.5).
 - **P2** — `payment_allocations` uniqueness, soft-delete policy, `deduction_category` enum, `move_out_balance` charge type — all resolved below.
+
+---
+
+## 0a. Changelog — v0.2 → v0.3
+
+This revision reconciles the earlier combined "v1.0" PRD/SRS (conceptually older; the version numbers were inverted) against the v0.2 build contract. v0.2's architecture is retained in full; three Philippine-specific features from v1.0 are pulled **into MVP scope** and re-homed onto v0.2's normalized model. Full rationale: `StormlightPMS_Spec_Reconciliation.md`.
+
+**Decisions frozen (D5–D8)**
+
+- **D5** — **PDC (Post-Dated Check) Digital Vault is in the MVP.** A PDC is a *promise*, tracked in a new `post_dated_checks` table (§4.22) with its own status lifecycle (§4.1 `pdc_status`); on clearing it materializes a `payments` row. Vault list supports bulk status updates. New stale-check sweep job (§9 JOB-5). (FR-PDC-*, §6.14)
+- **D6** — **BIR Form 2307 / 5% CWT withholding is in the MVP.** Commercial-lease charges carry a CWT split (`cwt_amount`, `net_payable`); the tenant pays `net_payable` in cash and remits the CWT to the BIR, evidenced by Form 2307. A charge with cash received but the 2307 still missing sits in the new **`pending_form_2307`** escrow state, not `paid`. (FR-CWT-*, §6.15) **This modifies the v0.2 charge-status and allocation triggers — see §9.4 and the reconciliation report §5.**
+- **D7** — **Utility sub-metering is in the MVP.** A master utility bill (`utility_bills`, §4.23) plus per-unit readings (`utility_meter_readings`, §4.24) generate ordinary `charges` via an idempotent RPC, with the common-area variance surfaced for review. (FR-UTIL-*, §6.16)
+- **D8** — **Optional polymorphic unit specs.** `units` gains an additive, optional `specs jsonb` (§4.6) for asset-class-specific fields (e.g. warehouse apex height, condo balcony sqm), rendered by a Zod-driven dynamic field registry keyed on `property_type`. Existing fixed columns are unchanged. **Automatic rent escalation stays out** — `escalation_rate`/`escalation_frequency_months` remain reference-only (v2 roadmap).
+
+Scope boundary clarified (§11.2): **CWT tracking + Form 2307 escrow is IN; issuing official BIR receipts / ORs remains OUT (v3).**
 
 ---
 
@@ -164,14 +179,18 @@ All tables use `uuid` primary keys (`gen_random_uuid()`), `created_at timestampt
 | `unit_status` | `vacant`, `occupied`, `under_maintenance`, `unavailable` |
 | `lease_status` | `draft`, `active`, `expired`, `terminated`, `renewed` |
 | `charge_type` | `rent`, `utility_electricity`, `utility_water`, `association_dues`, `parking`, `penalty`, `move_out_balance`, `other` |
-| `charge_status` | `unpaid`, `partially_paid`, `paid`, `void` |
+| `charge_status` | `unpaid`, `partially_paid`, `pending_form_2307`, `paid`, `void` |
 | `payment_method` | `cash`, `bank_transfer`, `gcash`, `maya`, `check`, `other` |
 | `payment_status` | `active`, `void` |
 | `deduction_category` | `unpaid_utility`, `damage` |
 | `maintenance_status` | `open`, `in_progress`, `completed`, `cancelled` |
 | `maintenance_priority` | `low`, `medium`, `high`, `urgent` |
 | `doc_type` | `lease_contract`, `tenant_id`, `payment_proof`, `property_photo`, `settlement`, `other` |
-| `notification_type` | `rent_due`, `rent_overdue`, `lease_expiring`, `maintenance_update`, `system` |
+| `notification_type` | `rent_due`, `rent_overdue`, `lease_expiring`, `maintenance_update`, `pdc_stale`, `system` |
+| `pdc_status` | `vaulted`, `deposited`, `cleared`, `bounced`, `stale` |
+| `form_2307_status` | `not_required`, `pending`, `received` |
+| `utility_type` | `electricity`, `water` |
+| `utility_allocation_method` | `by_submeter`, `equal_split`, `by_floor_area` |
 
 ### 4.2 Table: organizations
 
@@ -249,9 +268,12 @@ Scopes a Property_Manager to specific properties.
 | floor_area_sqm | numeric(10,2) | nullable |
 | base_monthly_rent | numeric(14,2) | not null, ≥ 0 |
 | unit_status | unit_status | not null, default `vacant` |
+| specs | jsonb | not null, default `'{}'::jsonb` — **optional** asset-class-specific fields (D8); see note |
 | notes | text | nullable |
 | created_at / created_by / updated_at | — | standard |
 | | | UNIQUE (property_id, unit_label) |
+
+**`units.specs` (D8):** an additive, optional bag of asset-class-specific attributes (e.g. warehouse `apex_height_m`, `loading_docks`; condo `balcony_sqm`). The fixed columns above are unchanged and remain the canonical inventory fields. The set of `specs` keys offered for a unit is driven by an **app-side field registry keyed on the parent property's `property_type`** (a TypeScript + Zod schema map, not `react-jsonschema-form`); the database stores the resulting JSON without per-key constraints. No reporting or RLS logic depends on `specs` in the MVP.
 
 ### 4.7 Table: tenants
 
@@ -289,6 +311,8 @@ Scopes a Property_Manager to specific properties.
 | security_deposit_amount | numeric(14,2) | default 0, ≥ 0 — the refundable deposit held |
 | escalation_rate | numeric(5,2) | default 0 — percent, reference only |
 | escalation_frequency_months | integer | default 12 — reference only |
+| is_cwt_applicable | boolean | not null, default false — true for commercial leases subject to BIR CWT (D6) |
+| withholding_tax_rate | numeric(5,2) | not null, default 0 — percent; typically 5.00 when `is_cwt_applicable` (D6) |
 | renewed_from_lease_id | uuid | FK → leases(id), nullable |
 | termination_date | date | nullable — stage-1 vacate date |
 | termination_reason | text | nullable |
@@ -308,12 +332,20 @@ Rule: at most one lease per unit may be in `active` status at any time — enfor
 | charge_type | charge_type | not null |
 | description | text | nullable |
 | billing_period | date | nullable — first day of the month covered |
-| amount | numeric(14,2) | not null, CHECK > 0 |
+| amount | numeric(14,2) | not null, CHECK > 0 — **gross** charge |
+| cwt_rate | numeric(5,2) | not null, default 0 — CWT percent applied to this charge (D6) |
+| cwt_amount | numeric(14,2) | not null, default 0, ≥ 0 — `round(amount * cwt_rate/100, 2)`; trigger-maintained |
+| net_payable | numeric(14,2) | not null — `amount − cwt_amount`; the cash the tenant pays; trigger-maintained; never set by the client (D6) |
+| form_2307_status | form_2307_status | not null, default `not_required` — `pending` once `cwt_amount > 0`, `received` on upload |
+| form_2307_url | text | nullable — Storage path of the uploaded BIR Form 2307 |
+| form_2307_received_date | date | nullable |
 | due_date | date | not null |
 | charge_status | charge_status | not null, default `unpaid` — maintained by trigger (§9.4); never set by the client |
 | voided_at | timestamptz | nullable |
 | voided_by | uuid | nullable, FK → profiles(id) |
 | created_at / created_by / updated_at | — | standard |
+
+**CWT note (D6):** for a non-CWT charge, `cwt_rate = 0`, `cwt_amount = 0`, `net_payable = amount`, `form_2307_status = not_required` — behavior is identical to v0.2. `cwt_amount`/`net_payable` are recomputed by trigger whenever `amount` or `cwt_rate` changes, and `net_payable` may never drop below the charge's allocated total (§9.4).
 
 ### 4.10 Table: payments
 
@@ -350,7 +382,7 @@ Links a payment to the charge(s) it pays; supports split and partial payments.
 
 **Integrity rules — enforced by database trigger only (§9.4), with row locking:**
 - SUM(`amount_applied`) for a payment ≤ that payment's `amount`.
-- SUM(`amount_applied`) for a charge ≤ that charge's `amount`.
+- SUM(`amount_applied`) for a charge ≤ that charge's **`net_payable`** (D6 — the tenant pays the net of CWT; for non-CWT charges `net_payable = amount`, so behavior is unchanged).
 - A payment and the charges it is allocated to must share the same `lease_id`.
 - Allocations may not target a `void` charge or belong to a `void` payment.
 
@@ -460,8 +492,9 @@ A row is created automatically when an organization is created.
 ### 4.19 Indexing and RLS performance
 
 - Index every `org_id` column and every foreign-key column.
-- Composite indexes where jobs/reports filter: `charges (org_id, charge_status, due_date)`, `leases (org_id, lease_status, end_date)`, `payment_allocations (charge_id)`, `payment_allocations (payment_id)`.
+- Composite indexes where jobs/reports filter: `charges (org_id, charge_status, due_date)`, `leases (org_id, lease_status, end_date)`, `payment_allocations (charge_id)`, `payment_allocations (payment_id)`, `post_dated_checks (org_id, status, check_date)`, `utility_meter_readings (utility_bill_id)`.
 - Partial unique index on `leases (unit_id) WHERE lease_status = 'active'`.
+- Partial index `charges (org_id, due_date) WHERE charge_status = 'pending_form_2307'` for the CWT-receivable report (D6).
 - RLS policies must wrap helper calls as scalar sub-selects — `(SELECT app_org())` — so Postgres evaluates them once per query rather than once per row.
 
 ### 4.20 Relationships
@@ -474,13 +507,76 @@ units 1──* leases *──1 tenants
 leases 1──* charges
 leases 1──* payments 1──* payment_allocations *──1 charges
 leases 1──* deposit_deductions
+leases 1──* post_dated_checks  (cleared check 1──1 payments)
+properties 1──* utility_bills 1──* utility_meter_readings *──1 leases
+utility_meter_readings 0..1──1 charges  (generated_charge_id)
 units 1──* maintenance_requests
 profiles *──* properties   (via property_assignments)
 organizations 1──* documents / notifications / audit_log
 ```
 
 ### 4.21 Deletion policy
-Financial and lease records are **never hard-deleted**: `leases`, `charges`, `payments`, `payment_allocations`, `deposit_deductions`, `audit_log`. Charges and payments are retired via `void`; leases via `terminated`/`expired`. `properties` and `tenants` are archived via their `status` column. Only `documents` (FR-DOC-3), draft leases with no children, and unassigned `property_assignments` may be hard-deleted.
+Financial and lease records are **never hard-deleted**: `leases`, `charges`, `payments`, `payment_allocations`, `deposit_deductions`, `post_dated_checks`, `audit_log`. Charges and payments are retired via `void`; leases via `terminated`/`expired`; PDCs via their status lifecycle (`bounced`/`stale`). `properties` and `tenants` are archived via their `status` column. Only `documents` (FR-DOC-3), draft leases with no children, unassigned `property_assignments`, and a `utility_bills` row with no generated charges may be hard-deleted.
+
+### 4.22 Table: post_dated_checks (D5)
+A post-dated check is a **promise of future payment**, not received money; it does not affect the lease ledger until it clears (§6.14).
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | uuid | PK |
+| org_id | uuid | not null, FK → organizations(id) |
+| lease_id | uuid | not null, FK → leases(id) |
+| check_number | text | not null |
+| issuing_bank | text | not null |
+| check_date | date | not null — maturity date printed on the check |
+| amount | numeric(14,2) | not null, CHECK > 0 |
+| status | pdc_status | not null, default `vaulted` |
+| deposited_date | date | nullable |
+| cleared_date | date | nullable |
+| bounced_reason | text | nullable |
+| linked_payment_id | uuid | nullable, FK → payments(id) — set when the check clears |
+| notes | text | nullable |
+| created_at / created_by / updated_at | — | standard |
+| | | UNIQUE (org_id, issuing_bank, check_number) |
+
+On transition to `cleared`, the system creates a `payments` row (`payment_method = check`, `payment_date = cleared_date`, `amount`) and stores its id in `linked_payment_id`; allocation to charges then follows the normal payment path (§6.7). A `bounced` check has no active payment (any linked payment is voided); a penalty charge may be raised manually.
+
+### 4.23 Table: utility_bills (D7)
+A master utility bill for a property and billing period, to be apportioned across active leases.
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | uuid | PK |
+| org_id | uuid | not null, FK → organizations(id) |
+| property_id | uuid | not null, FK → properties(id) |
+| utility_type | utility_type | not null |
+| billing_period | date | not null — first day of the month covered |
+| provider | text | nullable — e.g. Meralco, Maynilad |
+| total_amount | numeric(14,2) | not null, CHECK > 0 |
+| total_consumption | numeric(14,2) | nullable — kWh / cu.m, for variance reporting |
+| bill_date | date | nullable |
+| due_date | date | not null — propagated to generated charges |
+| allocation_method | utility_allocation_method | not null, default `by_submeter` |
+| charges_generated_at | timestamptz | nullable — set when generation runs; the idempotency gate |
+| created_at / created_by / updated_at | — | standard |
+| | | UNIQUE (property_id, utility_type, billing_period) |
+
+### 4.24 Table: utility_meter_readings (D7)
+Per-lease sub-meter readings for one `utility_bills` row.
+
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | uuid | PK |
+| org_id | uuid | not null, FK → organizations(id) |
+| utility_bill_id | uuid | not null, FK → utility_bills(id) |
+| lease_id | uuid | not null, FK → leases(id) |
+| previous_reading | numeric(14,2) | not null, ≥ 0 |
+| current_reading | numeric(14,2) | not null, ≥ 0, CHECK ≥ previous_reading |
+| consumption | numeric(14,2) | not null — `current_reading − previous_reading` |
+| computed_share | numeric(14,2) | nullable — the peso amount apportioned to this lease at generation |
+| generated_charge_id | uuid | nullable, FK → charges(id) — set when the utility charge is created |
+| created_at / created_by / updated_at | — | standard |
+| | | UNIQUE (utility_bill_id, lease_id) |
 
 ---
 
@@ -543,12 +639,15 @@ RLS is enabled **and forced** (`FORCE ROW LEVEL SECURITY`) on every operational 
 | charges | all | `org_id = app_org()` | `lease_id` reachable via an assigned property |
 | payments / payment_allocations | all | `org_id = app_org()` | `lease_id` reachable via an assigned property |
 | deposit_deductions | all | `org_id = app_org()` | `lease_id` reachable via an assigned property |
+| post_dated_checks | all | `org_id = app_org()` | `lease_id` reachable via an assigned property |
+| utility_bills | all | `org_id = app_org()` | `property_id IN app_pm_property_ids()` |
+| utility_meter_readings | all | `org_id = app_org()` | `lease_id` reachable via an assigned property |
 | maintenance_requests | all | `org_id = app_org()` | `unit_id` reachable via an assigned property |
 | documents | all | `org_id = app_org()` | `org_id = app_org()` *(MVP simplification)* |
 | notifications | all | own org rows | rows where `profile_id = auth.uid()` |
 | audit_log | all (read) | own org rows, read-only | none |
 
-`charge_status`, `payment_status`, `unit_status`, and `lease`-derived deposit fields are maintained by triggers; client `UPDATE` of these columns is rejected by a column-level guard trigger.
+`charge_status`, `payment_status`, `unit_status`, `charges.cwt_amount`, `charges.net_payable`, and `lease`-derived deposit fields are maintained by triggers; client `UPDATE` of these columns is rejected by a column-level guard trigger. (Clients may set `charges.cwt_rate`, `charges.form_2307_status`, `charges.form_2307_url` directly; the trigger derives `cwt_amount`/`net_payable` and recomputes `charge_status` from them.)
 
 ### 5.4 Deliberate decision — tenant visibility for Property_Managers
 Tenant records are not property-bound, so in the MVP a Property_Manager can read and create tenant records org-wide. Property-scoped data (units, leases, charges, payments, maintenance) remains restricted by assignment. Tradeoff: a PM can see tenant contact details for properties they do not manage. Accepted for MVP simplicity; tightening is a v2 candidate.
@@ -646,7 +745,7 @@ Each requirement has an ID, a statement, and acceptance criteria (AC). "User" me
 | ID | Requirement | AC |
 |----|-------------|----|
 | FR-PROP-1 | A user can create a property (name, type, Philippine address) | The property is created under the user's `org_id` |
-| FR-PROP-2 | A user can add one or more units to a property (label, base rent, status) | A standalone property is supported as a property with a single unit |
+| FR-PROP-2 | A user can add one or more units to a property (label, base rent, status, and optional asset-class `specs`) | A standalone property is supported as a property with a single unit; the unit form offers asset-class-specific `specs` fields driven by the parent `property_type` registry (D8), all optional |
 | FR-PROP-3 | A user can edit a property or unit | Changes persist; `updated_at` advances via trigger |
 | FR-PROP-4 | A user can archive a property | Archived properties are hidden from default lists but retained |
 | FR-PROP-5 | Unit status reflects lease state automatically per §6.5 transition table | The unit-status trigger applies every transition; client cannot set `unit_status` directly |
@@ -674,8 +773,9 @@ Each requirement has an ID, a statement, and acceptance criteria (AC). "User" me
 | FR-LEASE-7 | A lease detail view shows the tenant ledger | The ledger shows all charges, all payments and their allocations, the **outstanding balance**, any **unapplied credit**, and the deposit/advance held — see formula below |
 
 **Lease ledger figures (FR-LEASE-7):**
-- Outstanding balance = SUM(`amount` of non-void charges) − SUM(`amount_applied` of allocations to non-void charges from non-void payments).
+- Outstanding balance = SUM(`net_payable` of non-void charges) − SUM(`amount_applied` of allocations to non-void charges from non-void payments). (For non-CWT charges `net_payable = amount`, so this matches v0.2.)
 - Unapplied credit = SUM(non-void payment `amount`) − SUM(all `amount_applied` from non-void payments). Shown as available to allocate.
+- For CWT leases, the ledger additionally shows, per charge, the **gross** `amount`, the **CWT withheld** (`cwt_amount`), the **net payable**, and the **Form 2307 status** (`pending`/`received`). A charge sitting in `pending_form_2307` (cash settled, 2307 outstanding) is flagged distinctly from `paid`.
 - Deposit held and advance held are shown from the lease record; they are **not** part of the outstanding balance.
 
 **`lease_status` → `unit_status` transition table (FR-PROP-5):**
@@ -699,7 +799,7 @@ The unit-status trigger never moves a unit out of `under_maintenance` or `unavai
 | FR-CHG-2 | Supported charge types are rent, electricity, water, association/CUSA dues, parking, penalty, move-out balance, other | All enum values are selectable; `move_out_balance` is normally system-created (§6.8) but may be entered manually |
 | FR-CHG-3 | A user can edit an unpaid charge, or void a charge | A charge with any allocation cannot have its `amount` reduced below the allocated total; voiding requires the charge to be fully unallocated; voiding sets `charge_status = void`, `voided_at`, `voided_by` |
 | FR-CHG-4 | A user can copy all charges from a chosen previous billing period into a new period for one lease | New charges are created as editable `unpaid` charges for the new period; the action is manually triggered (no scheduling); `void` charges are not copied |
-| FR-CHG-5 | Charge status is derived from allocations by trigger | `unpaid` (0 applied), `partially_paid` (0 < applied < amount), `paid` (applied = amount), `void` (set explicitly); never set by the client |
+| FR-CHG-5 | Charge status is derived from allocations (and Form 2307 for CWT charges) by trigger | `unpaid` (0 applied), `partially_paid` (0 < applied < `net_payable`), `pending_form_2307` (applied ≥ `net_payable` **and** `cwt_amount > 0` **and** `form_2307_status ≠ received`), `paid` (applied ≥ `net_payable` and no outstanding 2307), `void` (set explicitly); never set by the client (D6) |
 
 Material corrections to a charge that already has allocations are made by voiding the corrected-against payment allocation, or by voiding the charge and reissuing — not by editing a paid charge.
 
@@ -708,7 +808,7 @@ Material corrections to a charge that already has allocations are made by voidin
 | ID | Requirement | AC |
 |----|-------------|----|
 | FR-PAY-1 | A user can record a payment on a lease (amount, date, method, reference number) | Payment is created with `payment_status = active` and linked to the lease |
-| FR-PAY-2 | A user can allocate a payment across one or more outstanding charges on the same lease | The allocation trigger enforces SUM(allocations) ≤ payment amount and ≤ each charge's amount; over-allocation is rejected |
+| FR-PAY-2 | A user can allocate a payment across one or more outstanding charges on the same lease | The allocation trigger enforces SUM(allocations) ≤ payment amount and ≤ each charge's **`net_payable`** (D6); over-allocation is rejected |
 | FR-PAY-3 | Partial payment is supported | A payment smaller than a charge moves that charge to `partially_paid` |
 | FR-PAY-4 | A payment may be left partly or wholly unallocated | The unallocated remainder shows on the lease ledger as **unapplied credit** and can be allocated later |
 | FR-PAY-5 | A user can upload a proof-of-payment file to a payment | File is stored privately; the payment shows a viewable signed link |
@@ -721,7 +821,7 @@ Move-out is a two-stage process. Stage 1 (vacate) is FR-LEASE-5. Stage 2 is fina
 
 | ID | Requirement | AC |
 |----|-------------|----|
-| FR-DEP-1 | Final settlement cannot begin until every non-deposit charge on the lease is fully paid or void | If any `rent`, `utility_*`, `association_dues`, `parking`, `penalty`, or `other` charge is `unpaid`/`partially_paid`, the settlement action is blocked with a list of the outstanding charges |
+| FR-DEP-1 | Final settlement cannot begin until every non-deposit charge on the lease is fully paid or void | If any `rent`, `utility_*`, `association_dues`, `parking`, `penalty`, or `other` charge is `unpaid`, `partially_paid`, or `pending_form_2307` (cash in but Form 2307 still outstanding — **not** fully settled), the settlement action is blocked with a list of the outstanding charges (D6) |
 | FR-DEP-2 | On a terminated lease, a user can add itemized deposit deductions, each categorized `unpaid_utility` or `damage` | Each deduction is recorded against the lease with its category, description, and amount |
 | FR-DEP-3 | The system computes the deposit refund | `deposit_refund_amount = max(0, security_deposit_amount − SUM(deductions))`; on finalize, `deposit_refund_amount` and `deposit_settled_date` are written |
 | FR-DEP-4 | If deductions exceed the deposit, the system posts the shortfall as a charge | A `move_out_balance` charge is created on the lease for `SUM(deductions) − security_deposit_amount`, `due_date` = settlement date; it then appears in arrears and collection reports |
@@ -768,6 +868,8 @@ Reports are implemented as Postgres views or `SECURITY INVOKER` RPC functions so
 | FR-RPT-4 | A collection summary reports total charged vs total collected for a selected date range | Optionally broken down per property |
 | FR-RPT-5 | A per-property income view sums payments received per property for a date range | Figures are scoped to the caller's permissions |
 | FR-RPT-6 | Each report can be exported to CSV | Export reflects the on-screen filters |
+| FR-RPT-7 | A CWT-receivable report lists charges in `pending_form_2307` with outstanding `cwt_amount` (D6) | Grouped by tenant/lease; totals the withholding still awaiting Form 2307; respects role scope (mirrors FR-CWT-5) |
+| FR-RPT-8 | A PDC maturity report lists `vaulted`/`deposited` checks by maturity `check_date` (D5) | Filterable by date range, bank, and lease; highlights checks maturing within 7 days and any `stale` checks |
 
 ### 6.13 IMP — Data import (D3)
 
@@ -778,6 +880,41 @@ Reports are implemented as Postgres views or `SECURITY INVOKER` RPC functions so
 | FR-IMP-3 | Documented CSV templates are provided | One template per importable entity, with required/optional columns and an example row |
 
 Import covers the four structural entities only. Historical charges and payments are entered manually or via a one-off seed script for GVL's portfolio — not through the in-app importer.
+
+### 6.14 PDC — Post-Dated Check Vault (D5)
+
+| ID | Requirement | AC |
+|----|-------------|----|
+| FR-PDC-1 | A user can record a post-dated check against a lease (check number, issuing bank, maturity `check_date`, amount) | The PDC is created with `status = vaulted`; it does **not** affect the lease ledger while vaulted |
+| FR-PDC-2 | A user can view the PDC vault — all checks, filterable by status, lease, bank, and maturity-date range | The list shows maturity, amount, and status; checks maturing soon are surfaced |
+| FR-PDC-3 | A user can update PDC status, including **bulk** updates across several checks at once | Selecting N checks and marking them `deposited` (or `cleared`/`bounced`) updates all in one action |
+| FR-PDC-4 | Marking a PDC `cleared` records the money as a payment | A `payments` row (`payment_method = check`, `payment_date = cleared_date`, `amount`) is created and linked via `linked_payment_id`; the user then allocates it to charges (§6.7) like any payment |
+| FR-PDC-5 | Marking a PDC `bounced` records the reason and reverses any realized payment | `bounced_reason` is stored; any `linked_payment_id` payment is voided (its allocations cascade off per FR-PAY-7); a penalty charge may be raised manually |
+| FR-PDC-6 | Checks past staleness are flagged | A `vaulted` check whose `check_date` is more than 6 months before Manila today is set `stale` by JOB-5 and surfaced for re-issuance follow-up |
+
+A PDC is a *promise*; only the `cleared` transition creates money. Voiding the linked payment is the single source of truth for reversing a cleared-then-bounced check.
+
+### 6.15 CWT — BIR Form 2307 / creditable withholding tax (D6)
+
+| ID | Requirement | AC |
+|----|-------------|----|
+| FR-CWT-1 | A user can mark a lease CWT-applicable and set its withholding rate | `is_cwt_applicable = true`, `withholding_tax_rate` (e.g. 5.00); typically commercial leases |
+| FR-CWT-2 | Charges on a CWT-applicable lease compute the withholding split | On create/edit, the trigger sets `cwt_amount = round(amount × cwt_rate/100, 2)` and `net_payable = amount − cwt_amount`; the tenant's cash obligation is `net_payable` |
+| FR-CWT-3 | A charge with cash settled but Form 2307 not yet received is held in escrow, not closed | When allocations cover `net_payable` but `cwt_amount > 0` and `form_2307_status ≠ received`, the charge is `pending_form_2307`, **not** `paid` (the v1.0 "Uncleared" rule) |
+| FR-CWT-4 | A user can upload a Form 2307 to a charge and mark it received | `form_2307_url` and `form_2307_received_date` are set, `form_2307_status = received`; the trigger then advances the charge from `pending_form_2307` to `paid` |
+| FR-CWT-5 | A CWT-receivable report lists charges awaiting Form 2307 | All `pending_form_2307` charges across the caller's scope, grouped by tenant/lease, totalling the outstanding `cwt_amount` |
+
+Scope boundary: StormlightPMS **tracks** the CWT and the physical Form 2307; it does **not** issue official BIR receipts or file returns (out of scope, §11.2).
+
+### 6.16 UTIL — Utility sub-metering (D7)
+
+| ID | Requirement | AC |
+|----|-------------|----|
+| FR-UTIL-1 | A user can enter a master utility bill for a property and billing period (type, provider, total amount, optional total consumption, due date, allocation method) | A `utility_bills` row is created; one bill per (property, utility_type, billing_period) |
+| FR-UTIL-2 | A user can enter per-lease sub-meter readings for a bill (previous and current reading) | A `utility_meter_readings` row per active lease; `consumption = current − previous`, with `current ≥ previous` enforced |
+| FR-UTIL-3 | The system previews each lease's computed share before charges are generated | Shares are computed per the bill's `allocation_method` (`by_submeter` = consumption-proportional, `equal_split`, or `by_floor_area`); the **common-area / system-loss variance** (`total_amount − Σ shares`) is displayed for review, not silently distributed |
+| FR-UTIL-4 | A user can generate utility charges from a bill | An RPC creates one `utility_electricity`/`utility_water` `charge` per lease for the period (`due_date` from the bill), writes back `computed_share` and `generated_charge_id`, and stamps `charges_generated_at` |
+| FR-UTIL-5 | Charge generation is idempotent | Re-running generation for a bill whose `charges_generated_at` is set is a no-op (no duplicate charges); corrections are made by voiding the generated charges and regenerating |
 
 ---
 
@@ -830,33 +967,38 @@ All jobs run via pg_cron, which calls an Edge Function through `pg_net` (`net.ht
 | JOB-2 | Overdue reminders | Same daily run | For non-void charges past `due_date` and not fully paid, insert one `rent_overdue` notification per charge per Manila day |
 | JOB-3 | Lease-expiry reminders | Same daily run | For `active` leases with `end_date` within each threshold in `lease_expiry_thresholds`, insert `lease_expiring` notifications, one per threshold per lease |
 | JOB-4 | Lease expiry transition | Same daily run | `active` leases past `end_date` are set to `expired`; the unit-status trigger then sets the unit `vacant` |
+| JOB-5 | Stale-PDC sweep (D5) | Same daily run | `post_dated_checks` in `status = vaulted` whose `check_date` is more than 6 months before Manila today are set `stale`; one `pdc_stale` notification per check (idempotent per §4.16, `dedupe_key = pdc_stale:{pdc_id}`) to the responsible Admin/PM |
 
 ### 9.4 Database triggers
 
 - **`set_updated_at`** — `BEFORE UPDATE` on every table with `updated_at`; sets `updated_at = now()`. Clients never set it.
-- **Charge-status trigger** — `AFTER INSERT/UPDATE/DELETE` on `payment_allocations`, and on `payments` status change: recomputes `charges.charge_status` for every affected charge from the sum of allocations from non-void payments (FR-CHG-5). Skips charges already `void`.
-- **Allocation guard** — `BEFORE INSERT/UPDATE` on `payment_allocations`: locks the parent payment and charge rows with `SELECT ... FOR UPDATE`, then rejects the write if it would push the per-payment or per-charge allocated total above its maximum, if payment and charge are on different leases, or if either parent is `void` (§4.11).
+- **CWT-derivation trigger (D6)** — `BEFORE INSERT/UPDATE` on `charges`: whenever `amount` or `cwt_rate` changes, sets `cwt_amount = round(amount × cwt_rate/100, 2)` and `net_payable = amount − cwt_amount`. Rejects the write if the recomputed `net_payable` would fall below the charge's current allocated total. This supersedes the v0.2 `charges_amount_guard`, which compared against `amount`; the guard now compares the allocated total against `net_payable`.
+- **Charge-status trigger** — `AFTER INSERT/UPDATE/DELETE` on `payment_allocations`, on `payments` status change, and on `charges.form_2307_status`/`cwt_*`/`amount` change: recomputes `charges.charge_status` for every affected charge from the sum of allocations from non-void payments (FR-CHG-5), measured against **`net_payable`**. When the applied total reaches `net_payable` but `cwt_amount > 0` and `form_2307_status ≠ received`, the status is **`pending_form_2307`**, not `paid`; receiving the 2307 advances it to `paid`. Skips charges already `void` (D6).
+- **Allocation guard** — `BEFORE INSERT/UPDATE` on `payment_allocations`: locks the parent payment and charge rows with `SELECT ... FOR UPDATE`, then rejects the write if it would push the per-payment allocated total above the payment `amount` or the per-charge allocated total above the charge's **`net_payable`** (D6), if payment and charge are on different leases, or if either parent is `void` (§4.11).
+- **PDC-clearing trigger (D5)** — `AFTER UPDATE` of `status` on `post_dated_checks`: on transition to `cleared`, inserts a `payments` row (`payment_method = check`, `payment_date = cleared_date`, `amount`) and writes its id back to `linked_payment_id`; on transition to `bounced`, voids any `linked_payment_id` payment (its allocations cascade off per the payment-void trigger).
 - **Unit-status trigger** — `AFTER UPDATE` of `lease_status` on `leases`: applies the §6.5 transition table.
-- **Status-column guard** — `BEFORE UPDATE` on `charges`, `payments`, `units`: rejects any client attempt to change a trigger-maintained status column outside the void/lease flows.
-- **Audit triggers** — `AFTER INSERT/UPDATE/DELETE` (`SECURITY DEFINER`) on `leases`, `charges`, `payments`, `payment_allocations`, `deposit_deductions`: write a row to `audit_log` with the acting `auth.uid()` and a before/after `jsonb` snapshot.
+- **Status-column guard** — `BEFORE UPDATE` on `charges`, `payments`, `units`: rejects any client attempt to change a trigger-maintained column outside the void/lease flows, including `charge_status`, `payment_status`, `unit_status`, and the derived `charges.cwt_amount` / `charges.net_payable` (D6).
+- **Audit triggers** — `AFTER INSERT/UPDATE/DELETE` (`SECURITY DEFINER`) on `leases`, `charges`, `payments`, `payment_allocations`, `deposit_deductions`, and `post_dated_checks`: write a row to `audit_log` with the acting `auth.uid()` and a before/after `jsonb` snapshot (NFR-11).
 
----
-
-## 10. Acceptance criteria — MVP Definition of Done
+### 9.5 Utility-charge generation RPC (D7)
+`generate_utility_charges(p_utility_bill_id uuid)` — a `SECURITY INVOKER` RPC (RLS-scoped to the caller). For the given bill it computes each lease's share per the bill's `allocation_method`, inserts one `charge` per lease (`charge_type` = `utility_electricity`/`utility_water`, `billing_period` and `due_date` from the bill), and writes back `computed_share` + `generated_charge_id` on each reading. It is **idempotent**: it refuses to run (no-op) if the bill's `charges_generated_at` is already set. Corrections are made by voiding the generated charges and regenerating (which clears the stamp). The common-area/system-loss variance is returned, not auto-distributed (FR-UTIL-3..5).
 
 The MVP is complete when:
 
 1. All FR-* requirements in §6 pass their acceptance criteria.
 2. RLS is enabled and forced on every operational table and verified by the automated suite (§10.1) — including cross-org and cross-assignment negative tests proving a user cannot read or write outside scope.
-3. All four scheduled jobs (§9) run on schedule and produce correct, idempotent notifications and emails.
-4. The financial triggers (§9.4) hold under partial-payment, split-payment, void, and concurrent-allocation scenarios.
-5. The two-stage move-out (§6.8) is verified, including the blocked-settlement and shortfall-charge paths.
-6. GVL's own property portfolio is fully entered (via FR-IMP import) and in daily operational use.
-7. NFR-1, NFR-3, NFR-4, NFR-9, and NFR-13 are demonstrated.
+3. All five scheduled jobs (§9, incl. JOB-5 stale-PDC) run on schedule and produce correct, idempotent notifications and emails.
+4. The financial triggers (§9.4) hold under partial-payment, split-payment, void, and concurrent-allocation scenarios — including the CWT `net_payable` allocation cap.
+5. The two-stage move-out (§6.8) is verified, including the blocked-settlement and shortfall-charge paths, and a `pending_form_2307` charge correctly blocks final settlement.
+6. The **PDC vault** (§6.14) is verified: vault → bulk status update → clear creates a linked payment → bounce voids it → stale sweep flags an aged check.
+7. The **CWT escrow gate** (§6.15) is verified: a CWT charge with cash covering `net_payable` but no Form 2307 sits in `pending_form_2307`, and uploading the 2307 advances it to `paid`.
+8. **Utility sub-metering** (§6.16) is verified: a master bill + readings generate per-lease charges once (idempotent), with the common-area variance surfaced.
+9. GVL's own property portfolio is fully entered (via FR-IMP import) and in daily operational use.
+10. NFR-1, NFR-3, NFR-4, NFR-9, and NFR-13 are demonstrated.
 
 ### 10.1 Test strategy
-- **Database/RLS:** pgTAP suite run by `supabase test db`, executed in CI on every migration. Covers every table's policy matrix with positive and negative cases, and the §9.4 triggers including a concurrent-allocation race test.
-- **Application:** component/unit tests for ledger math and currency formatting; an end-to-end smoke test for the critical flows (login, create lease, record payment, move-out settlement).
+- **Database/RLS:** pgTAP suite run by `supabase test db`, executed in CI on every migration. Covers every table's policy matrix (including `post_dated_checks`, `utility_bills`, `utility_meter_readings`) with positive and negative cases, and the §9.4 triggers including a concurrent-allocation race test. **New required cases (D5–D7):** allocation capped at `net_payable` (not gross `amount`); a CWT charge with cash-but-no-2307 lands in `pending_form_2307`, never `paid`; PDC `cleared` creates exactly one linked payment and `bounced` voids it; utility generation is idempotent.
+- **Application:** component/unit tests for ledger math (incl. CWT split), currency formatting, and the Zod `specs` registry; an end-to-end smoke test for the critical flows (login, create lease, record payment, move-out settlement, clear a PDC, receive a Form 2307).
 - A migration is not merged unless `supabase db reset` replays all migrations cleanly and the pgTAP suite passes.
 
 ---
@@ -870,4 +1012,6 @@ The MVP is complete when:
 Resolved since v0.1: A1 (operating entity — Stormlight Inc. product line), A3 (CSV import in MVP), A4 (co-tenants deferred to v2 — confirmed).
 
 ### 11.2 Out-of-scope reference (target v2 unless noted)
-Tenant portal; payment gateway; auto-generated SOA/invoices; SMS/Viber; landlord self-sign-up and subscription billing; automatic rent escalation; co-tenants/multiple occupants per lease; tightened tenant scoping for PMs; forced re-login on role change; BIR receipts and withholding (v3/out); native mobile apps (v3/out).
+Tenant portal; payment gateway; auto-generated SOA/invoices; SMS/Viber; landlord self-sign-up and subscription billing; **automatic** rent escalation (rate/frequency remain reference-only per D8); co-tenants/multiple occupants per lease; tightened tenant scoping for PMs; forced re-login on role change; BIR **official receipt / OR issuance and tax-return filing** (v3/out); native mobile apps (v3/out).
+
+**Pulled INTO MVP by the v0.3 reconciliation (no longer deferred):** PDC Digital Vault (D5, §6.14); BIR **Form 2307 / CWT tracking + escrow** (D6, §6.15 — note this is *tracking* of withholding and the physical 2307, distinct from OR issuance which remains out); utility sub-metering (D7, §6.16); optional polymorphic unit `specs` (D8, §4.6).
