@@ -18,6 +18,7 @@ const nav: NavItem[] = [
   { to: '/payments', label: 'Payments' },
   { to: '/maintenance', label: 'Maintenance' },
   { to: '/utilities', label: 'Utilities' },
+  { to: '/pdc', label: 'PDC vault' },
   { to: '/notifications', label: 'Notifications' },
   { to: '/reports', label: 'Reports' },
   { to: '/import', label: 'Import', roles: ['superadmin', 'admin'] },

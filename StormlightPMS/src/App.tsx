@@ -50,6 +50,9 @@ const UtilityBillDetailPage = lazy(() =>
     default: m.UtilityBillDetailPage,
   })),
 );
+const PdcVaultPage = lazy(() =>
+  import('./pages/pdc/PdcVaultPage').then((m) => ({ default: m.PdcVaultPage })),
+);
 const NotificationsPage = lazy(() =>
   import('./pages/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })),
 );
@@ -140,6 +143,7 @@ export function App() {
             <Route path="/maintenance" element={<MaintenancePage />} />
             <Route path="/utilities" element={<UtilitiesPage />} />
             <Route path="/utilities/:billId" element={<UtilityBillDetailPage />} />
+            <Route path="/pdc" element={<PdcVaultPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/reports/rent-roll" element={<ReportRentRollPage />} />
