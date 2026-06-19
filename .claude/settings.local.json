@@ -5,7 +5,8 @@
       "Bash(rm -rf .git)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(grep -ci \"\\\\.env$\\\\|\\\\.env\\\\.\")"
+      "Bash(grep -ci \"\\\\.env$\\\\|\\\\.env\\\\.\")",
+      "mcp__2de94dfa-164a-45d5-a37b-c346647dc165"
     ]
   }
 }
