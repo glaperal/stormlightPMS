@@ -13,8 +13,8 @@ export function ReportsPage() {
       <PageHeader title="Reports" subtitle="View and export operational reports" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {links.map((l) => (
-          <Link key={l.to} to={l.to} className="card p-5 hover:bg-slate-50">
-            <div className="text-base font-medium text-slate-900">{l.label}</div>
+          <Link key={l.to} to={l.to} className="card p-5 hover:bg-subtle">
+            <div className="text-base font-medium text-fg-1">{l.label}</div>
           </Link>
         ))}
       </div>

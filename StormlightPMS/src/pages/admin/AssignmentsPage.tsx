@@ -124,13 +124,13 @@ export function AssignmentsPage() {
           Assign
         </button>
       </div>
-      {error && <div className="text-sm text-red-700 mb-3">{error}</div>}
+      {error && <div className="text-sm text-danger-700 mb-3">{error}</div>}
       {(assignments.data ?? []).length === 0 ? (
         <EmptyState title="No assignments yet" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Property manager</th>
                 <th className="px-4 py-3 font-medium">Property</th>
@@ -139,13 +139,13 @@ export function AssignmentsPage() {
             </thead>
             <tbody>
               {assignments.data!.map((a) => (
-                <tr key={a.id} className="table-row border-t border-slate-100">
+                <tr key={a.id} className="table-row border-t border-subtle">
                   <td className="px-4 py-3">{a.profiles?.full_name ?? '—'}</td>
                   <td className="px-4 py-3">{a.properties?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-right">
                     <button
                       type="button"
-                      className="text-xs text-red-700 hover:underline"
+                      className="text-xs text-danger-700 hover:underline"
                       onClick={() => remove.mutate(a.id)}
                     >
                       Remove

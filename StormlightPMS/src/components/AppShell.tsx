@@ -34,10 +34,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex">
-      <aside className="w-60 shrink-0 bg-slate-900 text-slate-100 flex flex-col">
-        <div className="px-4 py-5 border-b border-slate-800">
-          <div className="text-lg font-semibold">StormlightPMS</div>
-          <div className="text-xs text-slate-400 mt-1 capitalize">
+      <aside className="w-60 shrink-0 bg-inverse text-on-dark flex flex-col">
+        <div className="px-4 py-5 border-b border-inverse">
+          <div className="text-lg font-semibold font-display">StormlightPMS</div>
+          <div className="text-xs text-on-dark-2 mt-1 capitalize">
             {claims.role || 'no role'}
           </div>
         </div>
@@ -51,14 +51,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className={({ isActive }) =>
                   cn(
                     'flex items-center justify-between rounded px-3 py-2 text-sm',
-                    isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800',
+                    isActive ? 'bg-brand text-white' : 'text-on-dark hover:bg-inverse-2',
                   )
                 }
               >
                 <span>{n.label}</span>
                 {n.to === '/notifications' && unread > 0 && (
                   <span
-                    className="ml-2 inline-flex items-center justify-center rounded-full bg-rose-600 px-2 text-xs font-semibold text-white"
+                    className="ml-2 inline-flex items-center justify-center rounded-full bg-danger px-2 text-xs font-semibold text-white"
                     aria-label={`${unread} unread notifications`}
                   >
                     {unread > 99 ? '99+' : unread}
@@ -67,12 +67,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               </NavLink>
             ))}
         </nav>
-        <div className="p-3 border-t border-slate-800 text-xs text-slate-400">
+        <div className="p-3 border-t border-inverse text-xs text-on-dark-2">
           <div className="truncate">{user?.email}</div>
           <button
             type="button"
             onClick={() => signOut()}
-            className="mt-2 w-full text-left text-slate-200 hover:text-white"
+            className="mt-2 w-full text-left text-on-dark hover:text-white"
           >
             Sign out
           </button>

@@ -85,19 +85,19 @@ export function Modal({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className={`card w-full ${widthCls} p-5 bg-white outline-none`}
+        className={`card w-full ${widthCls} p-5 bg-surface outline-none`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 id={titleId} className="text-lg font-semibold text-slate-900">
+          <h2 id={titleId} className="text-lg font-semibold font-display text-fg-1">
             {title}
           </h2>
           <button
             type="button"
             aria-label="Close dialog"
-            className="text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 rounded"
+            className="text-fg-3 hover:text-fg-1 focus:outline-none focus:ring-2 focus:ring-accent rounded"
             onClick={onClose}
           >
             ✕

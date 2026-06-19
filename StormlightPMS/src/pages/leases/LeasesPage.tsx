@@ -48,7 +48,7 @@ export function LeasesPage() {
         }
       />
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-sm text-slate-600">Status</label>
+        <label className="text-sm text-fg-2">Status</label>
         <select
           className="input max-w-xs"
           value={statusFilter}
@@ -64,13 +64,13 @@ export function LeasesPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState title="No leases" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Property · Unit</th>
                 <th className="px-4 py-3 font-medium">Tenant</th>
@@ -81,9 +81,9 @@ export function LeasesPage() {
             </thead>
             <tbody>
               {data!.map((l) => (
-                <tr key={l.id} className="table-row border-t border-slate-100">
+                <tr key={l.id} className="table-row border-t border-subtle">
                   <td className="px-4 py-3">
-                    <Link to={`/leases/${l.id}`} className="text-slate-900 hover:underline">
+                    <Link to={`/leases/${l.id}`} className="text-fg-1 hover:underline">
                       {l.units?.properties?.name ?? '—'} · {l.units?.unit_label ?? '—'}
                     </Link>
                   </td>

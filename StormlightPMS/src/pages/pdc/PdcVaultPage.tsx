@@ -140,7 +140,7 @@ export function PdcVaultPage() {
 
       {selected.size > 0 && (
         <div className="card mb-3 flex flex-wrap items-center gap-3 p-3">
-          <span className="text-sm text-slate-600">{selected.size} selected →</span>
+          <span className="text-sm text-fg-2">{selected.size} selected →</span>
           <select className="input max-w-xs" value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value as PdcStatus)}>
             <option value="deposited">Mark deposited</option>
             <option value="cleared">Mark cleared (creates payments)</option>
@@ -149,11 +149,11 @@ export function PdcVaultPage() {
           <button type="button" className="btn-primary" onClick={() => bulk.mutate()} disabled={bulk.isPending}>
             {bulk.isPending ? 'Applying…' : 'Apply'}
           </button>
-          {bulkError && <span className="text-sm text-red-700">{bulkError}</span>}
+          {bulkError && <span className="text-sm text-danger-700">{bulkError}</span>}
         </div>
       )}
 
-      <p className="mb-3 text-xs text-slate-500">
+      <p className="mb-3 text-xs text-fg-3">
         Clearing a check records its money as an <em>unapplied</em> payment on the lease — open the
         lease ledger to allocate it to charges.
       </p>
@@ -163,7 +163,7 @@ export function PdcVaultPage() {
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3">
                   <input
@@ -189,7 +189,7 @@ export function PdcVaultPage() {
                   r.check_date >= today &&
                   r.check_date <= soon;
                 return (
-                  <tr key={r.id} className="table-row border-t border-slate-100">
+                  <tr key={r.id} className="table-row border-t border-subtle">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
@@ -208,7 +208,7 @@ export function PdcVaultPage() {
                     <td className="px-4 py-3">
                       {fmtDate(r.check_date)}
                       {maturingSoon && (
-                        <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                        <span className="ml-2 rounded bg-warning-bg px-1.5 py-0.5 text-xs text-warning-fg">
                           soon
                         </span>
                       )}
@@ -314,7 +314,7 @@ function NewCheckModal({
           <input id="p-notes" className="input" {...register('notes')} />
         </Field>
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>

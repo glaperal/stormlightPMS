@@ -107,13 +107,13 @@ export function PaymentsPage() {
         </div>
       </div>
       {isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState title="No payments in this period" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Property · Unit</th>
@@ -125,10 +125,10 @@ export function PaymentsPage() {
             </thead>
             <tbody>
               {data!.map((p) => (
-                <tr key={p.id} className="table-row border-t border-slate-100">
+                <tr key={p.id} className="table-row border-t border-subtle">
                   <td className="px-4 py-3">{fmtDate(p.payment_date)}</td>
                   <td className="px-4 py-3">
-                    <Link to={`/leases/${p.lease_id}`} className="text-slate-900 hover:underline">
+                    <Link to={`/leases/${p.lease_id}`} className="text-fg-1 hover:underline">
                       {p.leases?.units?.properties?.name ?? '—'} ·{' '}
                       {p.leases?.units?.unit_label ?? '—'}
                     </Link>

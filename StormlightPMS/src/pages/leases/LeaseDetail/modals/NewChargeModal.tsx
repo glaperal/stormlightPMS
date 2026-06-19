@@ -119,13 +119,13 @@ export function NewChargeModal({
           <input id="c-desc" className="input" {...register('description')} />
         </Field>
         {isDuplicate && (
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <div className="rounded-md border border bg-warning-50 px-3 py-2 text-sm text-warning-fg">
             A non-void {watchedType.replace(/_/g, ' ')} charge already exists for this lease and
             billing period. You can still proceed if this is intentional.
           </div>
         )}
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>

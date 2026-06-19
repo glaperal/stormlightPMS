@@ -94,7 +94,7 @@ export function PropertyDetailPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['property', propertyId] }),
   });
 
-  if (property.isLoading) return <div className="text-sm text-slate-500">Loading…</div>;
+  if (property.isLoading) return <div className="text-sm text-fg-3">Loading…</div>;
   if (!property.data) return <EmptyState title="Property not found" />;
 
   const p = property.data;
@@ -126,7 +126,7 @@ export function PropertyDetailPage() {
       />
 
       <section className="card p-5 mb-6">
-        <h2 className="text-base font-medium text-slate-900 mb-3">Property details</h2>
+        <h2 className="text-base font-medium text-fg-1 mb-3">Property details</h2>
         <dl className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <Detail label="Type" value={p.property_type} />
           <Detail
@@ -142,9 +142,9 @@ export function PropertyDetailPage() {
       </section>
 
       <section>
-        <h2 className="text-base font-medium text-slate-900 mb-3">Units</h2>
+        <h2 className="text-base font-medium text-fg-1 mb-3">Units</h2>
         {units.isLoading ? (
-          <div className="text-sm text-slate-500">Loading units…</div>
+          <div className="text-sm text-fg-3">Loading units…</div>
         ) : (units.data ?? []).length === 0 ? (
           <EmptyState
             title="No units yet"
@@ -153,7 +153,7 @@ export function PropertyDetailPage() {
         ) : (
           <div className="card overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-slate-600 text-left">
+              <thead className="bg-subtle text-fg-2 text-left">
                 <tr>
                   <th className="px-4 py-3 font-medium">Label</th>
                   <th className="px-4 py-3 font-medium">Floor</th>
@@ -164,9 +164,9 @@ export function PropertyDetailPage() {
               </thead>
               <tbody>
                 {units.data!.map((u) => (
-                  <tr key={u.id} className="table-row border-t border-slate-100">
+                  <tr key={u.id} className="table-row border-t border-subtle">
                     <td className="px-4 py-3">
-                      <Link to={`/units/${u.id}`} className="text-slate-900 hover:underline">
+                      <Link to={`/units/${u.id}`} className="text-fg-1 hover:underline">
                         {u.unit_label}
                       </Link>
                     </td>
@@ -198,8 +198,8 @@ export function PropertyDetailPage() {
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs text-slate-500 uppercase tracking-wide">{label}</dt>
-      <dd className="mt-1 text-slate-900">{value}</dd>
+      <dt className="text-xs text-fg-3 uppercase tracking-wide">{label}</dt>
+      <dd className="mt-1 text-fg-1">{value}</dd>
     </div>
   );
 }
@@ -290,7 +290,7 @@ function NewUnitModal({
           <textarea id="u-notes" rows={3} className="input" {...register('notes')} />
         </Field>
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>

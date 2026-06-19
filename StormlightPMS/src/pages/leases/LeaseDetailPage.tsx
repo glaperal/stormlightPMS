@@ -112,7 +112,7 @@ export function LeaseDetailPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['lease', leaseId] }),
   });
 
-  if (lease.isLoading) return <div className="text-sm text-slate-500">Loading…</div>;
+  if (lease.isLoading) return <div className="text-sm text-fg-3">Loading…</div>;
   if (!lease.data) return <EmptyState title="Lease not found" />;
   const l = lease.data;
 
@@ -156,12 +156,12 @@ export function LeaseDetailPage() {
       />
 
       {activate.error && (
-        <div className="text-sm text-red-700 mb-3">{(activate.error as Error).message}</div>
+        <div className="text-sm text-danger-700 mb-3">{(activate.error as Error).message}</div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div className="card p-5 lg:col-span-1">
-          <h2 className="text-base font-medium text-slate-900 mb-3">Terms</h2>
+          <h2 className="text-base font-medium text-fg-1 mb-3">Terms</h2>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <Detail label="Term" value={`${fmtDate(l.start_date)} – ${fmtDate(l.end_date)}`} />
             <Detail label="Monthly rent" value={fmtPHP(l.monthly_rent)} />
@@ -191,7 +191,7 @@ export function LeaseDetailPage() {
         </div>
 
         <div className="card p-5 lg:col-span-2">
-          <h2 className="text-base font-medium text-slate-900 mb-3">Ledger</h2>
+          <h2 className="text-base font-medium text-fg-1 mb-3">Ledger</h2>
           {ledger.data ? (
             <dl className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <Detail label="Charged total" value={fmtPHP(ledger.data.charged_total)} />
@@ -205,14 +205,14 @@ export function LeaseDetailPage() {
               <Detail label="Advance held" value={fmtPHP(ledger.data.advance_held)} />
             </dl>
           ) : (
-            <div className="text-sm text-slate-500">No ledger yet.</div>
+            <div className="text-sm text-fg-3">No ledger yet.</div>
           )}
         </div>
       </div>
 
       <section className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-medium text-slate-900">Charges</h2>
+          <h2 className="text-base font-medium text-fg-1">Charges</h2>
           {l.lease_status !== 'expired' && l.lease_status !== 'renewed' && (
             <button type="button" className="btn-secondary" onClick={() => setChargeOpen(true)}>
               Add charge
@@ -229,7 +229,7 @@ export function LeaseDetailPage() {
 
       <section className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-medium text-slate-900">Payments</h2>
+          <h2 className="text-base font-medium text-fg-1">Payments</h2>
           {l.lease_status !== 'expired' && l.lease_status !== 'renewed' && (
             <button type="button" className="btn-primary" onClick={() => setPaymentOpen(true)}>
               Record payment
@@ -268,7 +268,7 @@ export function LeaseDetailPage() {
           invalidateMoney();
         }}
       />
-      <p className="text-xs text-slate-500 mt-6">
+      <p className="text-xs text-fg-3 mt-6">
         Tenant:{' '}
         <Link to={`/tenants/${l.tenants?.id}`} className="underline">
           {l.tenants?.full_name}

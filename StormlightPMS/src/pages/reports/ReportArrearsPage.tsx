@@ -41,15 +41,15 @@ export function ReportArrearsPage() {
           </button>
         }
       />
-      {error && <div className="text-sm text-red-700 mb-3">{(error as Error).message}</div>}
+      {error && <div className="text-sm text-danger-700 mb-3">{(error as Error).message}</div>}
       {isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState title="No outstanding charges" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Bucket</th>
                 <th className="px-4 py-3 font-medium">Outstanding</th>
@@ -57,7 +57,7 @@ export function ReportArrearsPage() {
             </thead>
             <tbody>
               {data!.map((b) => (
-                <tr key={b.bucket} className="table-row border-t border-slate-100">
+                <tr key={b.bucket} className="table-row border-t border-subtle">
                   <td className="px-4 py-3">{b.bucket}</td>
                   <td className="px-4 py-3">{fmtPHP(b.outstanding)}</td>
                 </tr>
