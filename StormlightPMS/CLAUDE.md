@@ -1,13 +1,15 @@
 # StormlightPMS — Claude Code instructions
 
-**StormlightPMS** is a multi-tenant property-management SaaS for Filipino lessors (landlords). It is a product line of Stormlight Inc. The app is **substantially built** — every screen exists under `src/pages/**`, 14 SQL migrations are applied, and the design system is being retrofitted onto the placeholder UI. This is no longer a greenfield scaffold; most work now is feature extension, fixes, and the v0.3 Philippine-specific features.
+**StormlightPMS** is a multi-tenant property-management SaaS for Filipino lessors (landlords). It is a product line of Stormlight Inc. The app is **substantially built** — every screen exists under `src/pages/**`, 14 SQL migrations are applied, and the design system is being retrofitted onto the placeholder UI. This is no longer a greenfield scaffold; current work is the remaining v0.4 features (D5/D7/D8), the design retrofit, and hardening.
 
-**The build contract is `StormlightPMS_SRS_v0.2.md`** (the file name is unchanged but its contents are now **v0.3** — see its header and changelog §0a). Read the relevant section before any task. If a request conflicts with the SRS, stop and flag the conflict — do not silently pick a side. Rationale and the v1.0↔v0.2 reconciliation live in `StormlightPMS_Spec_Reconciliation.md`; the SRS wins on any disagreement. The archived "v1.0" combined PRD/SRS (conceptually older — the version numbers were inverted) is kept for provenance at `archive/StormlightPMS_v1.0_ARCHIVED.md`.
+**The build contract is `StormlightPMS_SRS.md` (v0.4).** Its rationale companion is `StormlightPMS_PRD.md` (v0.4). Read the relevant section before any task. If a request conflicts with the SRS, stop and flag the conflict — do not silently pick a side; the SRS wins on any disagreement. Superseded docs (the v0.2/v0.3 SRS and the v1.0↔v0.2 reconciliation) are kept for provenance under `archive/`.
 
-### Current state vs. spec
+### Current state vs. spec (v0.4)
 
-- **Built (v0.2 baseline):** auth + provisioning, properties/units/tenants/leases CRUD, the normalized money model (charges/payments/allocations/deposits), maintenance, documents, notifications, scheduled jobs, reports, CSV import, and full RLS. The 14 migrations are all dated `20260521…` (v0.2 era).
-- **Specced but NOT yet built (v0.3, decisions D5–D8):** PDC (Post-Dated Check) Digital Vault (§6.14), BIR Form 2307 / 5% CWT withholding + `pending_form_2307` escrow state (§6.15), utility sub-metering (§6.16), and optional polymorphic unit `specs` JSONB (§4.6). These modify the charge-status and allocation triggers — read SRS §9.4 and the reconciliation report §5 before touching money triggers. When implementing them, write **new** migrations; do not edit the applied `20260521…` files.
+- **Built (v0.2 baseline):** auth + provisioning, properties/units/tenants/leases CRUD, the normalized money model (charges/payments/allocations/deposits), maintenance, documents, notifications, scheduled jobs JOB-1–4, reports FR-RPT-1–6, CSV import, and full RLS + pgTAP. The 14 migrations are all dated `20260521…` (v0.2 era).
+- **In scope, NOT yet built (v0.4 retains D5/D7/D8):** PDC (Post-Dated Check) Digital Vault (§4.22, §6.14, JOB-5, FR-RPT-8), utility sub-metering (§4.23–4.24, §6.16, §9.5), and optional polymorphic unit `specs` JSONB (§4.6). Built on the **existing** money model — no charge/allocation-trigger changes. Write **new** migrations; never edit the applied `20260521…` files.
+- **Deferred (D6 CWT / BIR Form 2307):** reversed out of the MVP in v0.4 → roadmap (v-next). The current code never implemented CWT, so it already matches the v0.4 CWT-free money model (allocations cap at the charge's gross `amount`). Do **not** add `net_payable`/`pending_form_2307`/`cwt_*`.
+- **Accepted hardening (SRS §12):** OR-1 (tenant-delete guard), OR-2 (`org_id` default `(select app_org())`), OR-3 (required concurrent-allocation race pgTAP), OR-4 (allocation org_id consistency), OR-5 (tighten `documents` RLS to PM property scope), OR-6 (child↔parent org_id assertions), OR-7 (soft UI dup-charge warning, no DB index), OR-8 (PDC-clears-as-credit UI note), OR-9 (wordmark until logo), OR-10 (FR-MNT-4 maintenance-status-change notification).
 
 ## Stack — fixed, do not substitute
 
@@ -45,9 +47,10 @@ supabase/
   functions/                  — Deno Edge Functions (+ _shared/)
   config.toml                 — local stack + per-function verify_jwt + access-token hook
 design-handoff/               — delivered brand kit (JSX/CSS reference; not imported at runtime)
-StormlightPMS_SRS_v0.2.md     — build contract (contents are v0.3)
-StormlightPMS_Spec_Reconciliation.md, DESIGN_SYSTEM_INTEGRATION_PLAN.md
-archive/StormlightPMS_v1.0_ARCHIVED.md
+StormlightPMS_SRS.md          — build contract (v0.4)
+StormlightPMS_PRD.md          — product rationale (v0.4)
+DESIGN_SYSTEM_INTEGRATION_PLAN.md
+archive/                      — superseded docs: v0.2/v0.3 SRS, reconciliation, v1.0
 ```
 
 ## App architecture (frontend)
@@ -91,7 +94,7 @@ Before committing: `npm run lint` and `npm run typecheck` (or `npm run build`) m
 
 ## RLS is test-first
 
-For each table, write the pgTAP test alongside the policy: a positive case, a cross-org negative case, and a cross-assignment negative case for PMs. A table is not done until `supabase test db` is green. CI runs the suite on every migration. New tables (e.g. the v0.3 PDC/CWT/sub-metering work) follow the same rule.
+For each table, write the pgTAP test alongside the policy: a positive case, a cross-org negative case, and a cross-assignment negative case for PMs. A table is not done until `supabase test db` is green. CI runs the suite on every migration. New tables (e.g. the D5 PDC and D7 sub-metering work) follow the same rule.
 
 ## Conventions
 
@@ -109,4 +112,4 @@ Service-role key and the Resend API key live in Supabase Vault and are used only
 - Keep diffs small enough to review — security tables especially.
 - State which SRS requirement IDs a change implements.
 - If something in the SRS is ambiguous or looks wrong, raise it before coding — do not guess.
-- **Branding is now defined.** The Stormlight brand kit was delivered (deep navy + teal + warm gold; Spectral / Plus Jakarta Sans / JetBrains Mono) and lives in `src/styles/tokens.css`; `design-handoff/` is the source reference and `DESIGN_SYSTEM_INTEGRATION_PLAN.md` tracks the retrofit (closing SRS assumption A5). Style screens via the design tokens, not ad-hoc colors. Do not invent new brand colors.
+- **Branding is finalized (SRS §7.1, A5 closed except logo).** Canonical tokens — navy `#0B3D6B` (brand) / gold `#F2C14E` (accent) / teal `#1B9AAA` (secondary) over a slate scale; Spectral / Plus Jakarta Sans / JetBrains Mono — live in `src/styles/tokens.css` + `tailwind.config.js`. Style screens via the semantic tokens (`--brand`, `--fg-1`, `--bg-surface`, …), not ad-hoc `slate-*` or raw scales. The logo asset is still pending (OR-9) → wordmark in `--font-display` on `--brand`. Do not invent new brand colors.
