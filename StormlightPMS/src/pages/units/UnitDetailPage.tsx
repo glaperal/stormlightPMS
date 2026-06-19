@@ -6,6 +6,8 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { fmtPHP, fmtDate } from '@/lib/format';
 import { useAuth, hasRole } from '@/lib/auth';
+import { UnitSpecsCard } from './UnitSpecsCard';
+import { type SpecsValue } from '@/lib/unitSpecs';
 
 interface UnitRow {
   id: string;
@@ -17,8 +19,9 @@ interface UnitRow {
   bedrooms: number | null;
   floor: string | null;
   floor_area_sqm: string | null;
+  specs: SpecsValue | null;
   notes: string | null;
-  properties: { name: string } | null;
+  properties: { name: string; property_type: string } | null;
 }
 
 interface LeaseRow {
@@ -40,7 +43,7 @@ export function UnitDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('units')
-        .select('*, properties(name)')
+        .select('*, properties(name, property_type)')
         .eq('id', unitId!)
         .maybeSingle();
       if (error) throw error;
@@ -137,6 +140,8 @@ export function UnitDetailPage() {
           </div>
         </dl>
       </section>
+
+      <UnitSpecsCard unitId={u.id} propertyType={u.properties?.property_type} specs={u.specs} />
 
       <section>
         <h2 className="text-base font-medium text-slate-900 mb-3">Lease history</h2>
