@@ -144,7 +144,7 @@ export function UtilityBillDetailPage() {
     onError: (e) => setError((e as Error).message),
   });
 
-  if (bill.isLoading) return <div className="text-sm text-slate-500">Loading…</div>;
+  if (bill.isLoading) return <div className="text-sm text-fg-3">Loading…</div>;
   if (!bill.data) return <EmptyState title="Bill not found" />;
 
   const usedLeaseIds = new Set((readings.data ?? []).map((r) => r.lease_id));
@@ -170,7 +170,7 @@ export function UtilityBillDetailPage() {
       </div>
 
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-medium text-slate-700">Per-lease meter readings</h2>
+        <h2 className="text-sm font-medium text-fg-2">Per-lease meter readings</h2>
         <div className="flex gap-2">
           <button
             type="button"
@@ -192,19 +192,19 @@ export function UtilityBillDetailPage() {
         </div>
       </div>
 
-      {error && <div className="mb-3 text-sm text-red-700">{error}</div>}
-      {genResult && <div className="mb-3 text-sm text-emerald-700">{genResult}</div>}
+      {error && <div className="mb-3 text-sm text-danger-700">{error}</div>}
+      {genResult && <div className="mb-3 text-sm text-success-700">{genResult}</div>}
 
       {preview && (
         <div className="card p-3 mb-4 text-sm">
-          <div className="font-medium text-slate-700 mb-1">Preview (not yet billed)</div>
-          <div className="text-slate-600">
+          <div className="font-medium text-fg-2 mb-1">Preview (not yet billed)</div>
+          <div className="text-fg-2">
             Σ shares {fmtPHP(previewTotal)} of {fmtPHP(total)} ·{' '}
-            <span className={variance === 0 ? 'text-slate-600' : 'text-amber-700'}>
+            <span className={variance === 0 ? 'text-fg-2' : 'text-warning-700'}>
               common-area / system-loss variance {fmtPHP(variance)}
             </span>
           </div>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-fg-3">
             The variance is surfaced for review and is not silently distributed (FR-UTIL-3).
           </p>
         </div>
@@ -215,7 +215,7 @@ export function UtilityBillDetailPage() {
       ) : (
         <div className="card overflow-hidden mb-4">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Unit · Tenant</th>
                 <th className="px-4 py-3 font-medium">Previous</th>
@@ -228,7 +228,7 @@ export function UtilityBillDetailPage() {
               {readings.data!.map((r) => {
                 const pv = preview?.find((p) => p.lease_id === r.lease_id);
                 return (
-                  <tr key={r.id} className="table-row border-t border-slate-100">
+                  <tr key={r.id} className="table-row border-t border-subtle">
                     <td className="px-4 py-3">
                       {r.leases?.units?.unit_label ?? '—'} · {r.leases?.tenants?.full_name ?? '—'}
                     </td>
@@ -268,8 +268,8 @@ export function UtilityBillDetailPage() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-1 font-medium text-slate-900">{value}</div>
+      <div className="text-xs uppercase tracking-wide text-fg-3">{label}</div>
+      <div className="mt-1 font-medium text-fg-1">{value}</div>
     </div>
   );
 }
@@ -319,7 +319,7 @@ function AddReadingForm({
 
   if (leases.length === 0) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-fg-3">
         All active leases on this property already have a reading.
       </p>
     );
@@ -327,7 +327,7 @@ function AddReadingForm({
 
   return (
     <div className="card p-4">
-      <h3 className="text-sm font-medium text-slate-700 mb-3">Add reading</h3>
+      <h3 className="text-sm font-medium text-fg-2 mb-3">Add reading</h3>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
         <Field label="Lease" htmlFor="r-lease">
           <select id="r-lease" className="input" value={leaseId} onChange={(e) => setLeaseId(e.target.value)}>
@@ -354,7 +354,7 @@ function AddReadingForm({
           {mutation.isPending ? 'Adding…' : 'Add'}
         </button>
       </div>
-      {error && <div className="mt-2 text-sm text-red-700">{error}</div>}
+      {error && <div className="mt-2 text-sm text-danger-700">{error}</div>}
     </div>
   );
 }

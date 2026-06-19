@@ -95,15 +95,15 @@ export function SettleDepositModal({
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-slate-900 mb-2">Itemized deductions</h3>
+          <h3 className="text-sm font-medium text-fg-1 mb-2">Itemized deductions</h3>
           {(deductions.data ?? []).length === 0 ? (
-            <div className="text-sm text-slate-500">No deductions yet.</div>
+            <div className="text-sm text-fg-3">No deductions yet.</div>
           ) : (
-            <ul className="text-sm divide-y divide-slate-100 border border-slate-200 rounded">
+            <ul className="text-sm divide-y divide-[var(--border-subtle)] border border rounded">
               {deductions.data!.map((d) => (
                 <li key={d.id} className="flex items-center justify-between px-3 py-2">
                   <span>
-                    <span className="badge bg-slate-100 text-slate-700 mr-2">
+                    <span className="badge bg-muted text-fg-2 mr-2">
                       {d.deduction_category.replace(/_/g, ' ')}
                     </span>
                     {d.description}
@@ -153,7 +153,7 @@ export function SettleDepositModal({
           </div>
         </div>
 
-        {error && <div className="text-sm text-red-700">{error}</div>}
+        {error && <div className="text-sm text-danger-700">{error}</div>}
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" className="btn-secondary" onClick={onClose}>
             Cancel

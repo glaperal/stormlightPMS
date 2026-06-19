@@ -21,7 +21,7 @@ export function UpdatePasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={onSubmit} className="card w-full max-w-sm p-6 space-y-4">
-        <h1 className="text-xl font-semibold text-slate-900">Set new password</h1>
+        <h1 className="text-xl font-semibold text-fg-1">Set new password</h1>
         <div>
           <label className="label" htmlFor="password">New password</label>
           <input
@@ -34,7 +34,7 @@ export function UpdatePasswordPage() {
             required
           />
         </div>
-        {error && <div className="text-sm text-red-700">{error}</div>}
+        {error && <div className="text-sm text-danger-700">{error}</div>}
         <button type="submit" className="btn-primary w-full" disabled={busy}>
           {busy ? 'Saving…' : 'Update password'}
         </button>

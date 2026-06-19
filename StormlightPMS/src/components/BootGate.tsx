@@ -45,22 +45,22 @@ export function BootGate({ children }: { children: ReactNode }) {
 
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center text-sm text-red-700">
+      <div className="flex h-screen items-center justify-center text-sm text-danger-700">
         {error}
       </div>
     );
   }
 
   if (!status) {
-    return <div className="flex h-screen items-center justify-center text-slate-500">Loading…</div>;
+    return <div className="flex h-screen items-center justify-center text-fg-3">Loading…</div>;
   }
 
   if (status.profile_status !== 'active' || status.org_status !== 'active') {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="card p-6 max-w-md text-center">
-          <h1 className="text-lg font-semibold text-slate-900">Access unavailable</h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <h1 className="text-lg font-semibold text-fg-1">Access unavailable</h1>
+          <p className="mt-2 text-sm text-fg-2">
             Your account or organization is not active. Please contact your administrator.
           </p>
           <button type="button" className="btn-secondary mt-4" onClick={() => signOut()}>

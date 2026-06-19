@@ -69,7 +69,7 @@ export function NotificationsPage() {
         }
       />
       {isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState title="No notifications" />
       ) : (
@@ -82,15 +82,15 @@ export function NotificationsPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <StatusBadge value={n.notification_type} />
-                  <span className="text-sm font-medium text-slate-900">{n.title}</span>
+                  <span className="text-sm font-medium text-fg-1">{n.title}</span>
                 </div>
-                {n.body && <p className="text-sm text-slate-600 mt-1">{n.body}</p>}
-                <p className="text-xs text-slate-400 mt-1">{fmtDateTime(n.created_at)}</p>
+                {n.body && <p className="text-sm text-fg-2 mt-1">{n.body}</p>}
+                <p className="text-xs text-fg-3 mt-1">{fmtDateTime(n.created_at)}</p>
               </div>
               {!n.is_read && (
                 <button
                   type="button"
-                  className="text-xs text-slate-700 hover:underline"
+                  className="text-xs text-fg-2 hover:underline"
                   onClick={() => markRead.mutate(n.id)}
                 >
                   Mark read

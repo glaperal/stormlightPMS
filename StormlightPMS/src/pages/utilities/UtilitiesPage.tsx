@@ -94,7 +94,7 @@ export function UtilitiesPage() {
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Period</th>
                 <th className="px-4 py-3 font-medium">Property</th>
@@ -107,7 +107,7 @@ export function UtilitiesPage() {
             </thead>
             <tbody>
               {bills.data!.map((b) => (
-                <tr key={b.id} className="table-row border-t border-slate-100">
+                <tr key={b.id} className="table-row border-t border-subtle">
                   <td className="px-4 py-3">{fmtDate(b.billing_period)}</td>
                   <td className="px-4 py-3">{b.properties?.name ?? '—'}</td>
                   <td className="px-4 py-3">
@@ -117,13 +117,13 @@ export function UtilitiesPage() {
                   <td className="px-4 py-3">{fmtDate(b.due_date)}</td>
                   <td className="px-4 py-3">
                     {b.charges_generated_at ? (
-                      <span className="text-xs text-emerald-700">Generated</span>
+                      <span className="text-xs text-success-700">Generated</span>
                     ) : (
-                      <span className="text-xs text-slate-500">Pending</span>
+                      <span className="text-xs text-fg-3">Pending</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link to={`/utilities/${b.id}`} className="text-xs text-slate-700 hover:underline">
+                    <Link to={`/utilities/${b.id}`} className="text-xs text-fg-2 hover:underline">
                       Open
                     </Link>
                   </td>
@@ -239,7 +239,7 @@ function NewBillModal({
           </Field>
         </div>
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>

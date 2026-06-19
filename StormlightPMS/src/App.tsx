@@ -95,7 +95,7 @@ const NotFoundPage = lazy(() =>
 function RouteFallback() {
   return (
     <div
-      className="flex h-[40vh] items-center justify-center text-sm text-slate-500"
+      className="flex h-[40vh] items-center justify-center text-sm text-fg-3"
       role="status"
       aria-live="polite"
     >
@@ -109,7 +109,7 @@ export function App() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center text-slate-500">Loading…</div>
+      <div className="flex h-screen items-center justify-center text-fg-3">Loading…</div>
     );
   }
 

@@ -90,7 +90,7 @@ export function NewPaymentModal({
           <textarea id="pm-notes" rows={2} className="input" {...register('notes')} />
         </Field>
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>
@@ -101,7 +101,7 @@ export function NewPaymentModal({
           </button>
         </div>
       </form>
-      <p className="text-xs text-slate-500 mt-2">
+      <p className="text-xs text-fg-3 mt-2">
         After recording, use "Allocate" to apply this payment against open charges.
       </p>
     </Modal>

@@ -216,19 +216,19 @@ export function ImportPage() {
           <label className="label">CSV file</label>
           <input type="file" accept=".csv" onChange={onFile} />
         </div>
-        <div className="text-xs text-slate-500">
+        <div className="text-xs text-fg-3">
           Required columns: {TEMPLATES[entity].columns.join(', ')}
         </div>
       </div>
 
       {rows.length > 0 && (
         <div className="card p-5 mb-4">
-          <div className="text-sm text-slate-700 mb-3">
+          <div className="text-sm text-fg-2 mb-3">
             {rows.length} rows ready to import. The whole file commits as one transaction.
           </div>
-          <div className="overflow-auto max-h-72 border border-slate-200 rounded">
+          <div className="overflow-auto max-h-72 border border rounded">
             <table className="w-full text-xs">
-              <thead className="bg-slate-50 text-slate-600 text-left">
+              <thead className="bg-subtle text-fg-2 text-left">
                 <tr>
                   {TEMPLATES[entity].columns.map((c) => (
                     <th key={c} className="px-2 py-1 font-medium">
@@ -239,7 +239,7 @@ export function ImportPage() {
               </thead>
               <tbody>
                 {rows.slice(0, 100).map((r, i) => (
-                  <tr key={i} className="border-t border-slate-100">
+                  <tr key={i} className="border-t border-subtle">
                     {TEMPLATES[entity].columns.map((c) => (
                       <td key={c} className="px-2 py-1">
                         {r[c] ?? ''}
@@ -269,10 +269,10 @@ export function ImportPage() {
         </div>
       )}
 
-      {resultMsg && <div className="card p-4 text-sm text-emerald-800 bg-emerald-50 border-emerald-200">{resultMsg}</div>}
+      {resultMsg && <div className="card p-4 text-sm text-success-fg bg-success-50 border">{resultMsg}</div>}
 
       {errors.length > 0 && (
-        <div className="card p-4 text-sm text-rose-800 bg-rose-50 border-rose-200">
+        <div className="card p-4 text-sm text-danger-fg bg-danger-50 border">
           <div className="font-medium mb-1">{errors.length} error(s) — nothing was imported.</div>
           <ul className="list-disc pl-5 space-y-1">
             {errors.slice(0, 20).map((e, i) => (

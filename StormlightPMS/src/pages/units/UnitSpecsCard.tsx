@@ -38,8 +38,8 @@ export function UnitSpecsCard({
 
   return (
     <section className="card p-5 mb-6">
-      <h2 className="text-base font-medium text-slate-900 mb-1">Asset specs</h2>
-      <p className="text-xs text-slate-500 mb-4">
+      <h2 className="text-base font-medium text-fg-1 mb-1">Asset specs</h2>
+      <p className="text-xs text-fg-3 mb-4">
         Optional, asset-class-specific attributes for this {propertyType} unit.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -82,7 +82,7 @@ export function UnitSpecsCard({
           );
         })}
       </div>
-      {error && <div className="mt-3 text-sm text-red-700">{error}</div>}
+      {error && <div className="mt-3 text-sm text-danger-700">{error}</div>}
       <div className="mt-4 flex items-center gap-3">
         <button
           type="button"
@@ -92,7 +92,7 @@ export function UnitSpecsCard({
         >
           {mutation.isPending ? 'Saving…' : 'Save specs'}
         </button>
-        {saved && <span className="text-sm text-emerald-700">Saved.</span>}
+        {saved && <span className="text-sm text-success-700">Saved.</span>}
       </div>
     </section>
   );

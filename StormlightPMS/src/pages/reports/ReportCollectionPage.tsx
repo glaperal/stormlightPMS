@@ -99,13 +99,13 @@ export function ReportCollectionPage() {
         </div>
       </div>
       {isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState title="No data in this range" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Property</th>
                 <th className="px-4 py-3 font-medium">Charged</th>
@@ -117,11 +117,11 @@ export function ReportCollectionPage() {
               {data!.map((r) => {
                 const delta = Number(r.total_collected) - Number(r.total_charged);
                 return (
-                  <tr key={r.property_id} className="table-row border-t border-slate-100">
+                  <tr key={r.property_id} className="table-row border-t border-subtle">
                     <td className="px-4 py-3">{r.property_name}</td>
                     <td className="px-4 py-3">{fmtPHP(r.total_charged)}</td>
                     <td className="px-4 py-3">{fmtPHP(r.total_collected)}</td>
-                    <td className={`px-4 py-3 ${delta < 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                    <td className={`px-4 py-3 ${delta < 0 ? 'text-danger-700' : 'text-success-700'}`}>
                       {fmtPHP(delta)}
                     </td>
                   </tr>

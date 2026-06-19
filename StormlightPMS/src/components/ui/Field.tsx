@@ -37,12 +37,12 @@ export function Field({ label, htmlFor, error, hint, children }: FieldProps) {
       </label>
       {enhancedChildren}
       {hint && !error && (
-        <p id={hintId} className="mt-1 text-xs text-slate-500">
+        <p id={hintId} className="mt-1 text-xs text-fg-3">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="mt-1 text-xs text-red-600">
+        <p id={errorId} role="alert" className="mt-1 text-xs text-danger-600">
           {error}
         </p>
       )}

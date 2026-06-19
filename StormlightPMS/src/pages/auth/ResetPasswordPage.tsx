@@ -22,9 +22,9 @@ export function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={onSubmit} className="card w-full max-w-sm p-6 space-y-4">
-        <h1 className="text-xl font-semibold text-slate-900">Reset password</h1>
+        <h1 className="text-xl font-semibold text-fg-1">Reset password</h1>
         {sent ? (
-          <p className="text-sm text-slate-600">If an account exists for {email}, a reset email has been sent.</p>
+          <p className="text-sm text-fg-2">If an account exists for {email}, a reset email has been sent.</p>
         ) : (
           <>
             <div>
@@ -38,13 +38,13 @@ export function ResetPasswordPage() {
                 required
               />
             </div>
-            {error && <div className="text-sm text-red-700">{error}</div>}
+            {error && <div className="text-sm text-danger-700">{error}</div>}
             <button type="submit" className="btn-primary w-full" disabled={busy}>
               {busy ? 'Sending…' : 'Send reset email'}
             </button>
           </>
         )}
-        <Link to="/login" className="text-sm text-slate-600 hover:text-slate-900">← Back to sign in</Link>
+        <Link to="/login" className="text-sm text-fg-2 hover:text-fg-1">← Back to sign in</Link>
       </form>
     </div>
   );

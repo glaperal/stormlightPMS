@@ -96,13 +96,13 @@ export function ReportRentRollPage() {
         </select>
       </div>
       {isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (data ?? []).length === 0 ? (
         <EmptyState title="No active leases" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Property · Unit</th>
                 <th className="px-4 py-3 font-medium">Tenant</th>
@@ -114,9 +114,9 @@ export function ReportRentRollPage() {
             </thead>
             <tbody>
               {data!.map((r) => (
-                <tr key={r.lease_id} className="table-row border-t border-slate-100">
+                <tr key={r.lease_id} className="table-row border-t border-subtle">
                   <td className="px-4 py-3">
-                    <Link to={`/leases/${r.lease_id}`} className="text-slate-900 hover:underline">
+                    <Link to={`/leases/${r.lease_id}`} className="text-fg-1 hover:underline">
                       {r.property_name} · {r.unit_label}
                     </Link>
                   </td>

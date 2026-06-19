@@ -84,16 +84,16 @@ export function UsersPage() {
         }
       />
       {toggleStatus.error && (
-        <div className="text-sm text-red-700 mb-3">{(toggleStatus.error as Error).message}</div>
+        <div className="text-sm text-danger-700 mb-3">{(toggleStatus.error as Error).message}</div>
       )}
       {users.isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (users.data ?? []).length === 0 ? (
         <EmptyState title="No users yet" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Email</th>
@@ -104,7 +104,7 @@ export function UsersPage() {
             </thead>
             <tbody>
               {users.data!.map((u) => (
-                <tr key={u.id} className="table-row border-t border-slate-100">
+                <tr key={u.id} className="table-row border-t border-subtle">
                   <td className="px-4 py-3">{u.full_name}</td>
                   <td className="px-4 py-3">{u.email}</td>
                   <td className="px-4 py-3 capitalize">{u.role.replace('_', ' ')}</td>
@@ -116,7 +116,7 @@ export function UsersPage() {
                       (claims.role === 'admin' || claims.role === 'superadmin') && (
                         <button
                           type="button"
-                          className="text-xs text-slate-700 hover:underline"
+                          className="text-xs text-fg-2 hover:underline"
                           onClick={() =>
                             toggleStatus.mutate({
                               profile_id: u.id,
@@ -213,7 +213,7 @@ function InviteModal({
           </Field>
         )}
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>
