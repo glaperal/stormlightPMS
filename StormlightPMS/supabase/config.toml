@@ -39,9 +39,6 @@ enable_confirmations = true
 enabled = true
 uri = "pg-functions://postgres/public/custom_access_token_hook"
 
-[functions]
-verify_jwt = true
-
 [functions.invite-user]
 verify_jwt = true
 

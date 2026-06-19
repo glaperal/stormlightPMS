@@ -6,6 +6,8 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { fmtPHP, fmtDate } from '@/lib/format';
 import { useAuth, hasRole } from '@/lib/auth';
+import { UnitSpecsCard } from './UnitSpecsCard';
+import { type SpecsValue } from '@/lib/unitSpecs';
 
 interface UnitRow {
   id: string;
@@ -17,8 +19,9 @@ interface UnitRow {
   bedrooms: number | null;
   floor: string | null;
   floor_area_sqm: string | null;
+  specs: SpecsValue | null;
   notes: string | null;
-  properties: { name: string } | null;
+  properties: { name: string; property_type: string } | null;
 }
 
 interface LeaseRow {
@@ -40,7 +43,7 @@ export function UnitDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('units')
-        .select('*, properties(name)')
+        .select('*, properties(name, property_type)')
         .eq('id', unitId!)
         .maybeSingle();
       if (error) throw error;
@@ -71,7 +74,7 @@ export function UnitDetailPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['unit', unitId] }),
   });
 
-  if (unit.isLoading) return <div className="text-sm text-slate-500">Loading…</div>;
+  if (unit.isLoading) return <div className="text-sm text-fg-3">Loading…</div>;
   if (!unit.data) return <EmptyState title="Unit not found" />;
   const u = unit.data;
 
@@ -120,32 +123,34 @@ export function UnitDetailPage() {
       <section className="card p-5 mb-6">
         <dl className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
           <div>
-            <dt className="text-xs uppercase text-slate-500">Base rent</dt>
+            <dt className="text-xs uppercase text-fg-3">Base rent</dt>
             <dd className="mt-1">{fmtPHP(u.base_monthly_rent)}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase text-slate-500">Floor</dt>
+            <dt className="text-xs uppercase text-fg-3">Floor</dt>
             <dd className="mt-1">{u.floor ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase text-slate-500">Bedrooms</dt>
+            <dt className="text-xs uppercase text-fg-3">Bedrooms</dt>
             <dd className="mt-1">{u.bedrooms ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase text-slate-500">Area (sqm)</dt>
+            <dt className="text-xs uppercase text-fg-3">Area (sqm)</dt>
             <dd className="mt-1">{u.floor_area_sqm ?? '—'}</dd>
           </div>
         </dl>
       </section>
 
+      <UnitSpecsCard unitId={u.id} propertyType={u.properties?.property_type} specs={u.specs} />
+
       <section>
-        <h2 className="text-base font-medium text-slate-900 mb-3">Lease history</h2>
+        <h2 className="text-base font-medium text-fg-1 mb-3">Lease history</h2>
         {(leases.data ?? []).length === 0 ? (
           <EmptyState title="No leases on this unit" />
         ) : (
           <div className="card overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-slate-600 text-left">
+              <thead className="bg-subtle text-fg-2 text-left">
                 <tr>
                   <th className="px-4 py-3 font-medium">Tenant</th>
                   <th className="px-4 py-3 font-medium">Term</th>
@@ -155,9 +160,9 @@ export function UnitDetailPage() {
               </thead>
               <tbody>
                 {leases.data!.map((l) => (
-                  <tr key={l.id} className="table-row border-t border-slate-100">
+                  <tr key={l.id} className="table-row border-t border-subtle">
                     <td className="px-4 py-3">
-                      <Link to={`/leases/${l.id}`} className="text-slate-900 hover:underline">
+                      <Link to={`/leases/${l.id}`} className="text-fg-1 hover:underline">
                         {l.tenants?.full_name ?? '—'}
                       </Link>
                     </td>

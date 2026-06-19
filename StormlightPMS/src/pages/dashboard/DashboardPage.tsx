@@ -30,7 +30,7 @@ export function DashboardPage() {
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Occupancy, arrears, and upcoming charges" />
-      {error && <div className="text-sm text-red-700">{(error as Error).message}</div>}
+      {error && <div className="text-sm text-danger-700">{(error as Error).message}</div>}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card label="Occupied units" value={isLoading ? '…' : String(data?.occupied_units ?? 0)} />
         <Card label="Vacant units" value={isLoading ? '…' : String(data?.vacant_units ?? 0)} />
@@ -44,8 +44,8 @@ export function DashboardPage() {
 function Card({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-5">
-      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold text-slate-900">{value}</div>
+      <div className="text-xs uppercase tracking-wide text-fg-3">{label}</div>
+      <div className="mt-2 text-2xl font-semibold text-fg-1">{value}</div>
     </div>
   );
 }

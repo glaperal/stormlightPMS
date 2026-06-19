@@ -109,7 +109,7 @@ export function LeaseNewPage() {
     <div className="max-w-3xl">
       <PageHeader title="New lease" subtitle="Create a draft lease. Activation moves the unit to occupied." />
       {noUnits && (
-        <div className="card p-4 text-sm text-slate-700 mb-4">
+        <div className="card p-4 text-sm text-fg-2 mb-4">
           No vacant units available. Mark a unit vacant first, or add a new unit.
         </div>
       )}
@@ -186,7 +186,7 @@ export function LeaseNewPage() {
           </Field>
         </div>
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button

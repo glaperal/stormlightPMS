@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -42,11 +42,33 @@ export function NewChargeModal({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ChargeFormValues>({
     resolver: zodResolver(ChargeSchema),
     defaultValues: { charge_type: 'rent', due_date: manilaToday() },
   });
+
+  // OR-7 (soft, non-blocking): warn if a non-void charge of the same type already
+  // exists for this lease + billing period, so a duplicate isn't created by accident.
+  const watchedType = watch('charge_type');
+  const watchedPeriod = watch('billing_period');
+  const dupCheck = useQuery({
+    queryKey: ['charge-dup', leaseId, watchedType, watchedPeriod],
+    enabled: open && !!watchedPeriod,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('charges')
+        .select('id', { count: 'exact', head: true })
+        .eq('lease_id', leaseId)
+        .eq('charge_type', watchedType)
+        .eq('billing_period', watchedPeriod as string)
+        .neq('charge_status', 'void');
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+  const isDuplicate = (dupCheck.data ?? 0) > 0;
   const mutation = useMutation({
     mutationFn: async (values: ChargeFormValues) => {
       const { error } = await supabase.from('charges').insert({
@@ -96,8 +118,14 @@ export function NewChargeModal({
         <Field label="Description" htmlFor="c-desc">
           <input id="c-desc" className="input" {...register('description')} />
         </Field>
+        {isDuplicate && (
+          <div className="rounded-md border border bg-warning-50 px-3 py-2 text-sm text-warning-fg">
+            A non-void {watchedType.replace(/_/g, ' ')} charge already exists for this lease and
+            billing period. You can still proceed if this is intentional.
+          </div>
+        )}
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>

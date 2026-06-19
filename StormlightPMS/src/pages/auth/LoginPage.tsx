@@ -25,11 +25,11 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={onSubmit} className="card w-full max-w-sm p-6 space-y-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">StormlightPMS</h1>
-          <p className="text-sm text-slate-500 mt-1">Sign in to your account</p>
+          <h1 className="text-2xl font-semibold text-fg-1">StormlightPMS</h1>
+          <p className="text-sm text-fg-3 mt-1">Sign in to your account</p>
         </div>
         {!SUPABASE_CONFIGURED && (
-          <div className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <div className="rounded border border bg-warning-50 p-3 text-xs text-warning-700">
             Supabase env vars are not configured yet. Copy <code>.env.example</code> to{' '}
             <code>.env.local</code>, fill in your project URL and anon key, then restart the dev
             server. The UI renders without them, but sign-in and data calls will fail until they
@@ -60,12 +60,12 @@ export function LoginPage() {
             required
           />
         </div>
-        {error && <div className="text-sm text-red-700">{error}</div>}
+        {error && <div className="text-sm text-danger-700">{error}</div>}
         <button type="submit" className="btn-primary w-full" disabled={busy}>
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
         <div className="text-right text-sm">
-          <Link to="/reset-password" className="text-slate-600 hover:text-slate-900">
+          <Link to="/reset-password" className="text-fg-2 hover:text-fg-1">
             Forgot password?
           </Link>
         </div>

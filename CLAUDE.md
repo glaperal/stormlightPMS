@@ -14,10 +14,10 @@ StormlightPMS/                 — the product: Vite + React + TS SPA on a Supab
   src/                         — React app (pages, components, lib, hooks, styles)
   supabase/                    — migrations, pgTAP tests, Edge Functions, config.toml
   design-handoff/              — delivered Stormlight brand kit (JSX/CSS reference, not run at runtime)
-  StormlightPMS_SRS_v0.2.md    — build contract (contents are now v0.3 — the file name is unchanged)
-  StormlightPMS_Spec_Reconciliation.md
+  StormlightPMS_SRS.md         — build contract (v0.4)
+  StormlightPMS_PRD.md         — product rationale (v0.4)
   DESIGN_SYSTEM_INTEGRATION_PLAN.md
-  archive/StormlightPMS_v1.0_ARCHIVED.md
+  archive/                     — superseded docs (v0.2/v0.3 SRS, reconciliation, v1.0)
   CLAUDE.md                    — app-level engineering instructions (read this for any app work)
 predict/                       — scratch workspace for an automated codebase-audit run (artifact stubs)
 .claude/                       — launch.json (dev launcher) + settings.local.json (permissions)
@@ -26,7 +26,7 @@ predict/                       — scratch workspace for an automated codebase-a
 ## Where to start
 
 - **App / feature / bug work** → `cd StormlightPMS` and follow `StormlightPMS/CLAUDE.md`.
-- **What the product must do** → `StormlightPMS/StormlightPMS_SRS_v0.2.md` (the build contract; SRS wins over any other doc). Rationale and the v1.0↔v0.2 reconciliation are in `StormlightPMS/StormlightPMS_Spec_Reconciliation.md`.
+- **What the product must do** → `StormlightPMS/StormlightPMS_SRS.md` (v0.4 — the build contract; SRS wins over any other doc). Product rationale is in `StormlightPMS/StormlightPMS_PRD.md` (v0.4).
 - **Design / styling** → `StormlightPMS/DESIGN_SYSTEM_INTEGRATION_PLAN.md` and `StormlightPMS/src/styles/tokens.css`.
 
 ## The 30-second summary

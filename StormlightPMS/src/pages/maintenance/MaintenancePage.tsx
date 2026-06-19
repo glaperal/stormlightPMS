@@ -87,7 +87,7 @@ export function MaintenancePage() {
         }
       />
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-sm text-slate-600">Status</label>
+        <label className="text-sm text-fg-2">Status</label>
         <select
           className="input max-w-xs"
           value={statusFilter}
@@ -106,7 +106,7 @@ export function MaintenancePage() {
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-600 text-left">
+            <thead className="bg-subtle text-fg-2 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Reported</th>
                 <th className="px-4 py-3 font-medium">Property · Unit</th>
@@ -144,7 +144,7 @@ function RequestRow({ row, onChanged }: { row: Request; onChanged: () => void })
   const [editing, setEditing] = useState(false);
   return (
     <>
-      <tr className="table-row border-t border-slate-100">
+      <tr className="table-row border-t border-subtle">
         <td className="px-4 py-3">{fmtDate(row.reported_date)}</td>
         <td className="px-4 py-3">
           {row.units?.properties?.name ?? '—'} · {row.units?.unit_label ?? '—'}
@@ -160,7 +160,7 @@ function RequestRow({ row, onChanged }: { row: Request; onChanged: () => void })
         <td className="px-4 py-3 text-right">
           <button
             type="button"
-            className="text-xs text-slate-700 hover:underline focus:outline-none focus:ring-2 focus:ring-slate-400 rounded px-1"
+            className="text-xs text-fg-2 hover:underline focus:outline-none focus:ring-2 focus:ring-accent rounded px-1"
             aria-label={`Edit maintenance request: ${row.title}`}
             onClick={() => setEditing(true)}
           >
@@ -257,7 +257,7 @@ function NewRequestModal({
           </Field>
         </div>
         {mutation.error && (
-          <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+          <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>
@@ -355,7 +355,7 @@ function EditRequestModal({
             />
           </Field>
         </div>
-        {error && <div className="text-sm text-red-700">{error}</div>}
+        {error && <div className="text-sm text-danger-700">{error}</div>}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>
             Cancel

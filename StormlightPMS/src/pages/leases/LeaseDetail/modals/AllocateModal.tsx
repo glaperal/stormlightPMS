@@ -101,7 +101,7 @@ export function AllocateModal({
             onChange={(e) => setAmount(e.target.value)}
           />
         </Field>
-        {error && <div className="text-sm text-red-700">{error}</div>}
+        {error && <div className="text-sm text-danger-700">{error}</div>}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>
             Cancel

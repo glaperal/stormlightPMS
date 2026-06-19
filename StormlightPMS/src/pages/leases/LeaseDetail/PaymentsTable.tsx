@@ -31,7 +31,7 @@ export function PaymentsTable({
   return (
     <div className="card overflow-hidden">
       <table className="w-full text-sm">
-        <thead className="bg-slate-50 text-slate-600 text-left">
+        <thead className="bg-subtle text-fg-2 text-left">
           <tr>
             <th className="px-4 py-3 font-medium">Date</th>
             <th className="px-4 py-3 font-medium">Amount</th>
@@ -43,7 +43,7 @@ export function PaymentsTable({
         </thead>
         <tbody>
           {rows.map((p) => (
-            <tr key={p.id} className="table-row border-t border-slate-100">
+            <tr key={p.id} className="table-row border-t border-subtle">
               <td className="px-4 py-3">{fmtDate(p.payment_date)}</td>
               <td className="px-4 py-3">{fmtPHP(p.amount)}</td>
               <td className="px-4 py-3">{p.payment_method}</td>
@@ -56,14 +56,14 @@ export function PaymentsTable({
                   <>
                     <button
                       type="button"
-                      className="text-xs text-slate-700 hover:underline focus:outline-none focus:ring-2 focus:ring-slate-400 rounded px-1"
+                      className="text-xs text-fg-2 hover:underline focus:outline-none focus:ring-2 focus:ring-accent rounded px-1"
                       onClick={() => setAllocateFor(p)}
                     >
                       Allocate
                     </button>
                     <button
                       type="button"
-                      className="text-xs text-red-700 hover:underline focus:outline-none focus:ring-2 focus:ring-red-400 rounded px-1"
+                      className="text-xs text-danger-700 hover:underline focus:outline-none focus:ring-2 focus:ring-danger rounded px-1"
                       onClick={() => voidPayment.mutate(p.id)}
                     >
                       Void
@@ -76,7 +76,7 @@ export function PaymentsTable({
         </tbody>
       </table>
       {voidPayment.error && (
-        <div className="px-4 py-2 text-sm text-red-700">
+        <div className="px-4 py-2 text-sm text-danger-700">
           {(voidPayment.error as Error).message}
         </div>
       )}

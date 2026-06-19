@@ -79,7 +79,7 @@ export function OrgSettingsPage() {
     <div className="max-w-xl">
       <PageHeader title="Organization settings" subtitle="Reminder windows and email behavior" />
       {isLoading ? (
-        <div className="text-sm text-slate-500">Loading…</div>
+        <div className="text-sm text-fg-3">Loading…</div>
       ) : (
         <form
           onSubmit={handleSubmit((v) => mutation.mutate(v))}
@@ -110,7 +110,7 @@ export function OrgSettingsPage() {
             Send reminder emails (in-app notifications always fire)
           </label>
           {mutation.error && (
-            <div className="text-sm text-red-700">{(mutation.error as Error).message}</div>
+            <div className="text-sm text-danger-700">{(mutation.error as Error).message}</div>
           )}
           <div className="flex justify-end">
             <button type="submit" className="btn-primary" disabled={formState.isSubmitting}>

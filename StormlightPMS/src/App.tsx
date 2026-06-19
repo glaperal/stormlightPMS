@@ -42,6 +42,17 @@ const PaymentsPage = lazy(() =>
 const MaintenancePage = lazy(() =>
   import('./pages/maintenance/MaintenancePage').then((m) => ({ default: m.MaintenancePage })),
 );
+const UtilitiesPage = lazy(() =>
+  import('./pages/utilities/UtilitiesPage').then((m) => ({ default: m.UtilitiesPage })),
+);
+const UtilityBillDetailPage = lazy(() =>
+  import('./pages/utilities/UtilityBillDetailPage').then((m) => ({
+    default: m.UtilityBillDetailPage,
+  })),
+);
+const PdcVaultPage = lazy(() =>
+  import('./pages/pdc/PdcVaultPage').then((m) => ({ default: m.PdcVaultPage })),
+);
 const NotificationsPage = lazy(() =>
   import('./pages/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })),
 );
@@ -84,7 +95,7 @@ const NotFoundPage = lazy(() =>
 function RouteFallback() {
   return (
     <div
-      className="flex h-[40vh] items-center justify-center text-sm text-slate-500"
+      className="flex h-[40vh] items-center justify-center text-sm text-fg-3"
       role="status"
       aria-live="polite"
     >
@@ -98,7 +109,7 @@ export function App() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center text-slate-500">Loading…</div>
+      <div className="flex h-screen items-center justify-center text-fg-3">Loading…</div>
     );
   }
 
@@ -130,6 +141,9 @@ export function App() {
             <Route path="/leases/:leaseId" element={<LeaseDetailPage />} />
             <Route path="/payments" element={<PaymentsPage />} />
             <Route path="/maintenance" element={<MaintenancePage />} />
+            <Route path="/utilities" element={<UtilitiesPage />} />
+            <Route path="/utilities/:billId" element={<UtilityBillDetailPage />} />
+            <Route path="/pdc" element={<PdcVaultPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/reports/rent-roll" element={<ReportRentRollPage />} />
