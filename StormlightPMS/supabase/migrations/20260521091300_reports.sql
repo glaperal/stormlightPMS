@@ -115,29 +115,34 @@ stable
 security invoker
 set search_path = public
 as $$
-  with x as (
-    select vb.outstanding,
-           public.manila_today() - vb.due_date as days_past
-      from public.v_charge_balances vb
-     where vb.outstanding > 0
-  )
-  select case
-           when days_past <= 0 then 'current'
-           when days_past between 1 and 30 then '1-30'
-           when days_past between 31 and 60 then '31-60'
-           when days_past between 61 and 90 then '61-90'
-           else '90+'
-         end as bucket,
-         sum(outstanding)::numeric(14,2) as outstanding
-    from x
-   group by 1
-   order by case bucket
-              when 'current' then 0
-              when '1-30' then 1
-              when '31-60' then 2
-              when '61-90' then 3
-              when '90+' then 4
-            end;
+  -- wrap the aggregate so the output alias `bucket` is a real input column to
+  -- order by (a bare `order by case bucket ...` resolves against the input
+  -- columns, where `bucket` does not exist, and fails on PostgreSQL).
+  select g.bucket, g.outstanding
+  from (
+    select case
+             when days_past <= 0 then 'current'
+             when days_past between 1 and 30 then '1-30'
+             when days_past between 31 and 60 then '31-60'
+             when days_past between 61 and 90 then '61-90'
+             else '90+'
+           end as bucket,
+           sum(outstanding)::numeric(14,2) as outstanding
+      from (
+        select vb.outstanding,
+               public.manila_today() - vb.due_date as days_past
+          from public.v_charge_balances vb
+         where vb.outstanding > 0
+      ) x
+     group by 1
+  ) g
+  order by case g.bucket
+             when 'current' then 0
+             when '1-30' then 1
+             when '31-60' then 2
+             when '61-90' then 3
+             when '90+' then 4
+           end;
 $$;
 
 -- Collection summary: charged vs collected in a date range (payment_date).
